@@ -4,6 +4,13 @@ chmod +x caddy
     mv /root/caddy /etc/naive/caddy    
     
     cat << EOF >/etc/naive/Caddyfile
+{
+  servers {
+    protocol {
+      experimental_http3  # 启用 HTTP/3
+    }
+  }
+}
 :443, 域名
 tls admin@seewo.com
 route {
