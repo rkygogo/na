@@ -116,11 +116,10 @@ fi
 chmod +x caddy
 mv caddy /usr/bin/
 mkdir /etc/caddy
-mv Caddyfile /etc/caddy/
 
     
-cat << EOF >/etc/naive/Caddyfile
-:443, 域名
+cat << EOF >/etc/caddy/Caddyfile
+:443, kb.ygkkk.eu.org
 tls admin@seewo.com
 route {
  forward_proxy {
@@ -129,21 +128,128 @@ route {
    hide_via
    probe_resistance
   }
- reverse_proxy  https://baidu.com  {
+ reverse_proxy  https://ygkkk.blogspot.com  {
    header_up  Host  {upstream_hostport}
    header_up  X-Forwarded-Host  {host}
   }
 }
 EOF
-    cat <<EOF > /root/naive-cl.json
+
+cat << EOF >/etc/caddy/caddy_server.json
 {
-  "listen": "socks://127.0.0.1:1080",
-  "proxy": "https://用户名:密码@域名",
-  "log": ""
+ "apps": {
+   "http": {
+     "servers": {
+       "srv0": {
+         "listen": [
+           ":443"   //监听端口
+         ],
+         "routes": [
+           {
+             "handle": [
+               {
+                 "auth_user_deprecated": "123",   //用户名
+                 "auth_pass_deprecated": "456",  //密码
+                 "handler": "forward_proxy",
+                 "hide_ip": true,
+                 "hide_via": true,
+                 "probe_resistance": {}
+               }
+             ]
+           },
+           {
+             "handle": [
+               {
+                 "handler": "reverse_proxy",
+                 "headers": {
+                   "request": {
+                     "set": {
+                       "Host": [
+                         "{http.reverse_proxy.upstream.hostport}"
+                       ],
+                       "X-Forwarded-Host": [
+                         "{http.request.host}"
+                       ]
+                     }
+                   }
+                 },
+                 "transport": {
+                   "protocol": "http",
+                   "tls": {}
+                 },
+                 "upstreams": [
+                   {
+                     "dial": "ygkkk.blogspot.com:443"  //伪装网址
+                   }
+                 ]
+               }
+             ]
+           }
+         ],
+         "tls_connection_policies": [
+           {
+             "match": {
+               "sni": [
+                 "kb.ygkkk.eu.org"  //域名
+               ]
+             },
+             "certificate_selection": {
+               "any_tag": [
+                 "cert0"
+               ]
+             }
+           }
+         ],
+         "automatic_https": {
+           "disable": true
+         }
+       }
+     }
+   },
+   "tls": {
+     "certificates": {
+       "load_files": [
+         {
+           "certificate": "/root/cert.crt",  //公钥路径
+           "key": "/root/private.key",   //私钥路径
+           "tags": [
+             "cert0"
+           ]
+         }
+       ]
+     }
+   }
+ }
 }
 EOF
-    qvurl="naive+https://用户名:密码@域名:443?padding=false#Naive"
-    echo $qvurl > /root/naive-qvurl.txt
-    
-    cd /opt/naive
-    /opt/naive/caddy start
+
+
+cat << EOF >/etc/systemd/system/caddy.service
+[Unit]
+Description=Caddy
+Documentation=https://caddyserver.com/docs/
+After=network.target network-online.target
+Requires=network-online.target
+
+[Service]
+#User=caddy
+#Group=caddy
+User=root
+Group=root
+ExecStart=/usr/bin/caddy run --environ --config /etc/caddy/Caddyfile
+ExecReload=/usr/bin/caddy reload --config /etc/caddy/Caddyfile
+TimeoutStopSec=5s
+#LimitNOFILE=1048576
+#LimitNPROC=512
+PrivateTmp=true
+ProtectSystem=full
+#AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable caddy
+systemctl start caddy
+
