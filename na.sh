@@ -119,7 +119,10 @@ mkdir /etc/caddy
 
     
 cat << EOF >/etc/caddy/Caddyfile
-:443, kb.ygkkk.eu.org
+{
+https_port 8443
+}
+:8443, kb.ygkkk.eu.org
 tls admin@seewo.com
 route {
  forward_proxy {
@@ -230,7 +233,6 @@ Description=Caddy
 Documentation=https://caddyserver.com/docs/
 After=network.target network-online.target
 Requires=network-online.target
-
 [Service]
 #User=caddy
 #Group=caddy
@@ -244,7 +246,6 @@ TimeoutStopSec=5s
 PrivateTmp=true
 ProtectSystem=full
 #AmbientCapabilities=CAP_NET_BIND_SERVICE
-
 [Install]
 WantedBy=multi-user.target
 EOF
