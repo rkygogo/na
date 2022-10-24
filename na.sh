@@ -145,7 +145,7 @@ cat << EOF >/etc/caddy/caddy_server.json
      "servers": {
        "srv0": {
          "listen": [
-           ":443"   //监听端口
+           ":8964"   //监听端口
          ],
          "routes": [
            {
@@ -182,7 +182,7 @@ cat << EOF >/etc/caddy/caddy_server.json
                  },
                  "upstreams": [
                    {
-                     "dial": "ygkkk.blogspot.com:443"  //伪装网址
+                     "dial": "ygkkk.blogspot.com"  //伪装网址
                    }
                  ]
                }
@@ -234,18 +234,13 @@ Documentation=https://caddyserver.com/docs/
 After=network.target network-online.target
 Requires=network-online.target
 [Service]
-#User=caddy
-#Group=caddy
 User=root
 Group=root
 ExecStart=/usr/bin/caddy run --environ --config /etc/caddy/Caddyfile
 ExecReload=/usr/bin/caddy reload --config /etc/caddy/Caddyfile
 TimeoutStopSec=5s
-#LimitNOFILE=1048576
-#LimitNPROC=512
 PrivateTmp=true
 ProtectSystem=full
-#AmbientCapabilities=CAP_NET_BIND_SERVICE
 [Install]
 WantedBy=multi-user.target
 EOF
