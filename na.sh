@@ -119,6 +119,11 @@ service apache2 stop >/dev/null 2>&1
 systemctl disable apache2 >/dev/null 2>&1
 fi
 
+if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
+green "已安装hysteria，重装请先执行卸载功能" && exit
+fi
+green "请选项安装naiveproxy方式:"
+readp "1. 直接使用已编译好的caddy2-naiveproxy版本（回车默认）\n2. 自动编译最新caddy2-naiveproxy版本\n请选择：" inscaddynaive
 
 if [[ $release = Centos ]]; then
 if [[ ${vsid} =~ 8 ]]; then
@@ -365,6 +370,61 @@ EOF
 systemctl daemon-reload
 systemctl enable caddy
 systemctl start caddy
+
+
+}
+
+
+stclre(){
+if [[ ! -f '/etc/hysteria/config.json' ]]; then
+red "未正常安装hysteria!" && exit
+fi
+green "hysteria服务执行以下操作"
+readp "1. 重启\n2. 关闭\n3. 启动\n请选择：" action
+if [[ $action == "1" ]]; then
+systemctl restart caddy
+green "hysteria服务重启"
+hysteriastatus
+white "$status\n"
+elif [[ $action == "2" ]]; then
+systemctl stop caddy
+systemctl disable caddy
+green "hysteria服务关闭"
+hysteriastatus
+white "$status\n"
+elif [[ $action == "3" ]]; then
+systemctl enable caddy
+systemctl start caddy
+green "hysteria服务开启"
+hysteriastatus
+white "$status\n"
+else
+red "输入错误,请重新选择" && stclre
+fi
+}
+
+cfwarp(){
+wget -N --no-check-certificate https://gitlab.com/rwkgyg/cfwarp/raw/main/CFwarp.sh && bash CFwarp.sh
+}
+
+
+ cat <<EOF > /root/naive-client.json
+{
+  "listen": "socks://127.0.0.1:1080",
+  "proxy": "https://${proxyname}:${proxypwd}@${domain}",
+  "log": ""
+}
+EOF
+
+    url="naive+https://${proxyname}:${proxypwd}@${domain}:443?padding=true#Naive"
+    echo $url > /root/naive-url.txt
+
+ green "NaiveProxy 已安装成功！"
+    yellow "客户端配置文件已保存至 /root/naive-client.json"
+    yellow "Qv2ray / SagerNet / Matsuri 分享链接已保存至 /root/naive-url.txt"
+    yellow "SagerNet / Matsuri 分享二维码如下："
+    qrencode -o - -t ANSIUTF8 "$url"
+
 
 
 kba(){
