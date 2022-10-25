@@ -135,6 +135,7 @@ apt update
 fi
 }
 forwardproxy(){
+go env -w GO111MODULE=on
 go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
 ~/go/bin/xcaddy build --with github.com/caddyserver/forwardproxy@caddy2=github.com/klzgrad/forwardproxy@naive
 }
