@@ -93,6 +93,7 @@ fi
 [[ $(type -P yum) ]] && yumapt='yum -y' || yumapt='apt -y'
 [[ $(type -P curl) ]] || (yellow "检测到curl未安装，升级安装中" && $yumapt update;$yumapt install curl)
 [[ $(type -P lsof) ]] || (yellow "检测到lsof未安装，升级安装中" && $yumapt update;$yumapt install lsof)
+[[ ! $(type -P qrencode) ]] && ($yumapt update;$yumapt install qrencode)
 if [[ -z $(grep 'DiG 9' /etc/hosts) ]]; then
 v4=$(curl -s4m5 https://ip.gs -k)
 if [ -z $v4 ]; then
@@ -119,11 +120,28 @@ systemctl disable apache2 >/dev/null 2>&1
 fi
 
 
-apt update
+if [[ $release = Centos ]]; then
+if [[ ${vsid} =~ 8 ]]; then
+cd /etc/yum.repos.d/ && mkdir backup && mv *repo backup/ 
+curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-8.repo
+sed -i -e "s|mirrors.cloud.aliyuncs.com|mirrors.aliyun.com|g " /etc/yum.repos.d/CentOS-*
+sed -i -e "s|releasever|releasever-stream|g" /etc/yum.repos.d/CentOS-*
+yum clean all && yum makecache
+fi
+yum install epel-release -y
+else
+$yumapt update
+fi
+
+rpm --import https://mirror.go-repo.io/centos/RPM-GPG-KEY-GO-REPO
+curl -s https://mirror.go-repo.io/centos/go-repo.repo | tee /etc/yum.repos.d/go-repo.repo
+yum install golang
+
 apt install software-properties-common
 add-apt-repository ppa:longsleep/golang-backports 
 apt update 
 apt install golang-go
+
 go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
 ~/go/bin/xcaddy build --with github.com/caddyserver/forwardproxy@caddy2=github.com/klzgrad/forwardproxy@naive
 
@@ -136,16 +154,96 @@ chmod +x caddy
 mv caddy /usr/bin/
 mkdir /etc/caddy
 
+
+inscertificate(){
+green "hysteria协议证书申请方式选择如下:"
+readp "1. acme一键申请证书（支持常规80端口模式与dns api模式），已有证书则自动识别（回车默认）\n2. 自定义证书路径\n请选择：" certificate
+if [ -z "${certificate}" ] || [ $certificate == "1" ]; then
+if [[ -f /root/cert.crt && -f /root/private.key ]] && [[ -s /root/cert.crt && -s /root/private.key ]]; then
+blue "经检测，之前已申请过acme证书"
+readp "1. 直接使用原来的证书，默认root路径（回车默认）\n2. 删除原来的证书，重新申请acme证书\n请选择：" certacme
+if [ -z "${certacme}" ] || [ $certacme == "1" ]; then
+readp "请输入已申请过的acme证书域名:" ym
+echo ${ym} > /etc/hysteria/ca.log
+blue "输入的域名：$ym ，已直接引用\n"
+elif [ $certacme == "2" ]; then
+rm -rf /root/cert.crt /root/private.key
+wget -N https://gitlab.com/rwkgyg/acme-script/raw/main/acme.sh && bash acme.sh
+ym=$(cat /etc/hysteria/ca.log)
+if [[ ! -f /root/cert.crt && ! -f /root/private.key ]] && [[ ! -s /root/cert.crt && ! -s /root/private.key ]]; then
+red "证书申请失败，脚本退出" && exit
+fi
+fi
+else
+wget -N https://gitlab.com/rwkgyg/acme-script/raw/main/acme.sh && bash acme.sh
+ym=$(cat /etc/hysteria/ca.log)
+if [[ ! -f /root/cert.crt && ! -f /root/private.key ]] && [[ ! -s /root/cert.crt && ! -s /root/private.key ]]; then
+red "域名申请失败，脚本退出" && exit
+fi
+fi
+certificatec='/root/cert.crt'
+certificatep='/root/private.key'
+
+elif [ $certificate == "2" ]; then
+readp "请输入已放置好证书的路径（/a/b/……/cert.crt）：" cerroad
+readp "请输入已放置好证书的路径（/a/b/……/private.key）：" keyroad
+certificatec=$cerroad
+certificatep=$keyroad
+
+
+else 
+red "输入错误，请重新选择" && inscertificate
+fi
+}
+
+
+insport(){
+readp "hysteria端口设置[1-65535]（回车跳过为443端口）：" port
+if [[ -z $port ]]; then
+port=443
+until [[ -z $(ss -ntlp | awk '{print $4}' | grep -w "$port") ]]
+do
+[[ -n $(ss -ntlp | awk '{print $4}' | grep -w "$port") ]] && yellow "\n端口被占用，请重新输入端口" && readp "自定义hysteria端口:" port
+done
+else
+until [[ -z $(ss -ntlp | awk '{print $4}' | grep -w "$port") ]]
+do
+[[ -n $(ss -ntlp | awk '{print $4}' | grep -w "$port") ]] && yellow "\n端口被占用，请重新输入端口" && readp "自定义hysteria端口:" port
+done
+fi
+blue "已确认端口：$port\n"
+}
+
+insuser(){
+readp "hysteria设置用户名（回车跳过为随机6位字符）：" user
+if [[ -z ${user} ]]; then
+pswd=`date +%s%N |md5sum | cut -c 1-6`
+fi
+blue "已确认用户名：${user}\n"
+}
+
+inspswd(){
+readp "hysteria设置密码（回车跳过为随机10位字符）：" pswd
+if [[ -z ${pswd} ]]; then
+pswd=`date +%s%N |md5sum | cut -c 1-10`
+fi
+blue "已确认密码：${pswd}\n"
+}
+
+
+
+green "设置配置文件中……，稍等5秒"
+
     
 cat << EOF >/etc/caddy/Caddyfile
 {
-https_port 443
+https_port $port
 }
-:443, ibmn.renky.eu.org
+:$port, $ym
 tls admin@seewo.com
 route {
  forward_proxy {
-   basic_auth 123 456
+   basic_auth ${user} ${pswd}
    hide_ip
    hide_via
    probe_resistance
@@ -164,14 +262,14 @@ cat << EOF >/etc/caddy/caddy_server.json
      "servers": {
        "srv0": {
          "listen": [
-           ":8964"   //监听端口
+           ":8964"   
          ],
          "routes": [
            {
              "handle": [
                {
-                 "auth_user_deprecated": "123",   //用户名
-                 "auth_pass_deprecated": "456",  //密码
+                 "auth_user_deprecated": "${user}",   
+                 "auth_pass_deprecated": "${pswd}", 
                  "handler": "forward_proxy",
                  "hide_ip": true,
                  "hide_via": true,
@@ -201,7 +299,7 @@ cat << EOF >/etc/caddy/caddy_server.json
                  },
                  "upstreams": [
                    {
-                     "dial": "ygkkk.blogspot.com"  //伪装网址
+                     "dial": "ygkkk.blogspot.com" 
                    }
                  ]
                }
@@ -212,7 +310,7 @@ cat << EOF >/etc/caddy/caddy_server.json
            {
              "match": {
                "sni": [
-                 "ibmn.renky.eu.org"  //域名
+                 "$ym"  
                ]
              },
              "certificate_selection": {
@@ -232,8 +330,8 @@ cat << EOF >/etc/caddy/caddy_server.json
      "certificates": {
        "load_files": [
          {
-           "certificate": "/root/cert.crt",  //公钥路径
-           "key": "/root/private.key",   //私钥路径
+           "certificate": "${certificatec}", 
+           "key": "${certificatep}",  
            "tags": [
              "cert0"
            ]
