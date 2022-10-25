@@ -120,9 +120,9 @@ mkdir /etc/caddy
     
 cat << EOF >/etc/caddy/Caddyfile
 {
-https_port 8443
+https_port 443
 }
-:8443, kb.ygkkk.eu.org
+:443, narm.renky.eu.org
 tls admin@seewo.com
 route {
  forward_proxy {
@@ -193,7 +193,7 @@ cat << EOF >/etc/caddy/caddy_server.json
            {
              "match": {
                "sni": [
-                 "kb.ygkkk.eu.org"  //域名
+                 "narm.renky.eu.org"  //域名
                ]
              },
              "certificate_selection": {
