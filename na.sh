@@ -252,3 +252,72 @@ systemctl daemon-reload
 systemctl enable caddy
 systemctl start caddy
 
+
+
+start_menu(){
+hysteriastatus
+clear
+green "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"           
+echo -e "${bblue} ░██     ░██      ░██ ██ ██         ░█${plain}█   ░██     ░██   ░██     ░█${red}█   ░██${plain}  "
+echo -e "${bblue}  ░██   ░██      ░██    ░░██${plain}        ░██  ░██      ░██  ░██${red}      ░██  ░██${plain}   "
+echo -e "${bblue}   ░██ ░██      ░██ ${plain}                ░██ ██        ░██ █${red}█        ░██ ██  ${plain}   "
+echo -e "${bblue}     ░██        ░${plain}██    ░██ ██       ░██ ██        ░█${red}█ ██        ░██ ██  ${plain}  "
+echo -e "${bblue}     ░██ ${plain}        ░██    ░░██        ░██ ░██       ░${red}██ ░██       ░██ ░██ ${plain}  "
+echo -e "${bblue}     ░█${plain}█          ░██ ██ ██         ░██  ░░${red}██     ░██  ░░██     ░██  ░░██ ${plain}  "
+green "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" 
+white "甬哥Gitlab项目  ：gitlab.com/rwkgyg"
+white "甬哥blogger博客 ：ygkkk.blogspot.com"
+white "甬哥YouTube频道 ：www.youtube.com/c/甬哥侃侃侃kkkyg"
+green "naiveproxy-yg脚本安装成功后，再次进入脚本的快捷方式为 na"
+red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+green " 1. 安装naiveproxy（必选）" 
+green " 2. 卸载naiveproxy"
+white "----------------------------------------------------------------------------------"
+green " 3. 配置变更（密码、端口）" 
+green " 4. 关闭、开启、重启naiveproxy"   
+green " 5. 更新naiveproxy-yg安装脚本"  
+green " 6. 更新naiveproxy内核"
+white "----------------------------------------------------------------------------------"
+green " 7. 显示当前naiveproxy分享链接、V2rayN配置文件、二维码"
+green " 8. 安装warp（可选）"
+green " 8. 安装bbr加速（可选）"
+green " 0. 退出脚本"
+red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+if [[ -n $(systemctl status hysteria-server 2>/dev/null | grep -w active) && -f '/etc/hysteria/config.json' ]]; then
+if [ "${hyygV}" = "${remoteV}" ]; then
+green "当前naiveproxy-yg安装脚本版本号：${hyygV} ，已是最新版本\n"
+else
+green "当前naiveproxy-yg安装脚本版本号：${hyygV}"
+yellow "检测到最新hysteria-yg安装脚本版本号：${remoteV} ，可选择5进行更新\n"
+fi
+loVERSION="$(/usr/local/bin/hysteria -v | awk 'NR==1 {print $3}')"
+hyVERSION="v$(curl -Ls "https://data.jsdelivr.com/v1/package/resolve/gh/HyNetwork/Hysteria" | grep '"version":' | sed -E 's/.*"([^"]+)".*/\1/')"
+if [ "${loVERSION}" = "${hyVERSION}" ]; then
+green "当前hysteria内核版本号：${loVERSION} ，已是最新版本\n"
+else
+green "当前hysteria内核版本号：${loVERSION}"
+yellow "检测到最新hysteria内核版本号：${hyVERSION} ，可选择6进行更新\n"
+fi
+fi
+white "VPS系统信息如下："
+white "操作系统:     $(blue "$op")" && white "内核版本:     $(blue "$version")" && white "CPU架构 :     $(blue "$cpu")" && white "虚拟化类型:   $(blue "$vi")"
+white "$status"
+echo
+readp "请输入数字:" Input
+case "$Input" in     
+ 1 ) inshysteria;;
+ 2 ) unins;;
+ 3 ) changeserv;;
+ 4 ) stclre;;
+ 5 ) uphyyg;; 
+ 6 ) uphysteriacore;;
+ 7 ) hysteriashare;;
+ 8 ) cfwarp;;
+ * ) exit 
+esac
+}
+if [ $# == 0 ]; then
+start
+start_menu
+fi
+
