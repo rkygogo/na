@@ -127,7 +127,7 @@ cat << EOF >/etc/caddy/Caddyfile
 {
 https_port 443
 }
-:443, narm.renky.eu.org
+:443, ibmn.renky.eu.org
 tls admin@seewo.com
 route {
  forward_proxy {
@@ -198,7 +198,7 @@ cat << EOF >/etc/caddy/caddy_server.json
            {
              "match": {
                "sni": [
-                 "narm.renky.eu.org"  //域名
+                 "ibmn.renky.eu.org"  //域名
                ]
              },
              "certificate_selection": {
