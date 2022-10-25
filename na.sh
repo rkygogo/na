@@ -39,9 +39,15 @@ op=`sys`
 version=`uname -r | awk -F "-" '{print $1}'`
 main=`uname  -r | awk -F . '{print $1}'`
 minor=`uname -r | awk -F . '{print $2}'`
+
 bit=`uname -m`
-[[ $bit = x86_64 ]] && cpu=amd64
-[[ $bit = aarch64 ]] && cpu=arm64
+if [[ $bit = x86_64 ]]; then
+cpu=amd64
+elif [[ $bit = aarch64 ]]; then
+cpu=arm64
+else
+red "VPS的CPU架构为$bit 不支持当前系统的CPU架构，请使用amd64或arm64架构的CPU运行脚本" && exit 1
+
 vi=`systemd-detect-virt`
 rm -rf /etc/localtime
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
@@ -111,6 +117,15 @@ systemctl disable httpd.service >/dev/null 2>&1
 service apache2 stop >/dev/null 2>&1
 systemctl disable apache2 >/dev/null 2>&1
 fi
+
+
+apt update
+apt install software-properties-common
+add-apt-repository ppa:longsleep/golang-backports 
+apt update 
+apt install golang-go
+go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
+~/go/bin/xcaddy build --with github.com/caddyserver/forwardproxy@caddy2=github.com/klzgrad/forwardproxy@naive
 
 
 rm /usr/bin/caddy
