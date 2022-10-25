@@ -42,7 +42,6 @@ minor=`uname -r | awk -F . '{print $2}'`
 bit=`uname -m`
 [[ $bit = x86_64 ]] && cpu=amd64
 [[ $bit = aarch64 ]] && cpu=arm64
-[[ $bit = s390x ]] && cpu=s390x
 vi=`systemd-detect-virt`
 rm -rf /etc/localtime
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
