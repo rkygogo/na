@@ -113,6 +113,9 @@ systemctl disable apache2 >/dev/null 2>&1
 fi
 
 
+
+tar zxvf caddy2-naive-linux-${arch}.tar.gz
+rm caddy2-naive-linux-${arch}.tar.gz -f
 chmod +x caddy
 mv caddy /usr/bin/
 mkdir /etc/caddy
