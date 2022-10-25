@@ -208,14 +208,11 @@ fi
 fi
 certificatec='/root/cert.crt'
 certificatep='/root/private.key'
-
 elif [ $certificate == "2" ]; then
 readp "请输入已放置好证书的路径（/a/b/……/cert.crt）：" cerroad
 readp "请输入已放置好证书的路径（/a/b/……/private.key）：" keyroad
 certificatec=$cerroad
 certificatep=$keyroad
-
-
 else 
 red "输入错误，请重新选择" && inscertificate
 fi
@@ -223,24 +220,24 @@ fi
 
 
 insport(){
-readp "hysteria端口设置[1-65535]（回车跳过为443端口）：" port
+readp "naiveproxy端口设置[1-65535]（回车跳过为443端口）：" port
 if [[ -z $port ]]; then
 port=443
 until [[ -z $(ss -ntlp | awk '{print $4}' | grep -w "$port") ]]
 do
-[[ -n $(ss -ntlp | awk '{print $4}' | grep -w "$port") ]] && yellow "\n端口被占用，请重新输入端口" && readp "自定义hysteria端口:" port
+[[ -n $(ss -ntlp | awk '{print $4}' | grep -w "$port") ]] && yellow "\n端口被占用，请重新输入端口" && readp "自定义naiveproxy端口:" port
 done
 else
 until [[ -z $(ss -ntlp | awk '{print $4}' | grep -w "$port") ]]
 do
-[[ -n $(ss -ntlp | awk '{print $4}' | grep -w "$port") ]] && yellow "\n端口被占用，请重新输入端口" && readp "自定义hysteria端口:" port
+[[ -n $(ss -ntlp | awk '{print $4}' | grep -w "$port") ]] && yellow "\n端口被占用，请重新输入端口" && readp "自定义naiveproxy端口:" port
 done
 fi
 blue "已确认端口：$port\n"
 }
 
 insuser(){
-readp "hysteria设置用户名（回车跳过为随机6位字符）：" user
+readp "设置naiveproxy用户名（回车跳过为随机6位字符）：" user
 if [[ -z ${user} ]]; then
 pswd=`date +%s%N |md5sum | cut -c 1-6`
 fi
@@ -248,18 +245,15 @@ blue "已确认用户名：${user}\n"
 }
 
 inspswd(){
-readp "hysteria设置密码（回车跳过为随机10位字符）：" pswd
+readp "设置naiveproxy密码（回车跳过为随机10位字符）：" pswd
 if [[ -z ${pswd} ]]; then
 pswd=`date +%s%N |md5sum | cut -c 1-10`
 fi
 blue "已确认密码：${pswd}\n"
 }
 
-
-
-green "设置配置文件中……，稍等5秒"
-
-    
+insconfig(){
+green "设置naiveproxy配置文件……"    
 cat << EOF >/etc/caddy/Caddyfile
 {
 https_port $port
@@ -367,8 +361,10 @@ cat << EOF >/etc/caddy/caddy_server.json
  }
 }
 EOF
+}
 
-
+insservice(){
+green "设置naiveproxy服务进程……"  
 cat << EOF >/etc/systemd/system/caddy.service
 [Unit]
 Description=Caddy
@@ -386,12 +382,14 @@ ProtectSystem=full
 [Install]
 WantedBy=multi-user.target
 EOF
-
 systemctl daemon-reload
 systemctl enable caddy
 systemctl start caddy
-
-
+if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
+green "naiveproxy安装成功" 
+else
+red "naiveproxy安装，请运行systemctl status caddy查看服务状态并反馈，脚本退出" && exit
+fi
 }
 
 
