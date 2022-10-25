@@ -119,12 +119,8 @@ service apache2 stop >/dev/null 2>&1
 systemctl disable apache2 >/dev/null 2>&1
 fi
 
-if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
-green "已安装hysteria，重装请先执行卸载功能" && exit
-fi
-green "请选项安装naiveproxy方式:"
-readp "1. 直接使用已编译好的caddy2-naiveproxy版本（回车默认）\n2. 自动编译最新caddy2-naiveproxy版本\n请选择：" inscaddynaive
-
+insupdate(){
+rm /usr/bin/caddy
 if [[ $release = Centos ]]; then
 if [[ ${vsid} =~ 8 ]]; then
 cd /etc/yum.repos.d/ && mkdir backup && mv *repo backup/ 
@@ -135,33 +131,50 @@ yum clean all && yum makecache
 fi
 yum install epel-release -y
 else
-$yumapt update
+apt update
 fi
-
-rpm --import https://mirror.go-repo.io/centos/RPM-GPG-KEY-GO-REPO
-curl -s https://mirror.go-repo.io/centos/go-repo.repo | tee /etc/yum.repos.d/go-repo.repo
-yum install golang
-
-apt install software-properties-common
-add-apt-repository ppa:longsleep/golang-backports 
-apt update 
-apt install golang-go
-
+}
+forwardproxy(){
 go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
 ~/go/bin/xcaddy build --with github.com/caddyserver/forwardproxy@caddy2=github.com/klzgrad/forwardproxy@naive
+}
 
 
-rm /usr/bin/caddy
+inscaddynaive(){
+if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
+green "已安装naiveproxy，重装请先执行卸载功能" && exit
+fi
+green "请选项安装naiveproxy方式:"
+readp "1. 直接使用已编译好的caddy2-naiveproxy版本（回车默认）\n2. 自动编译最新caddy2-naiveproxy版本\n请选择：" chcaddynaive
+if [ -z "$chcaddynaive" ] || [ $chcaddynaive == "1" ]; then
+insupdate
 wget -N https://github.com/rkygogo/na/raw/main/caddy2-naive-linux-${cpu}.tar.gz
 tar zxvf caddy2-naive-linux-${cpu}.tar.gz
 rm caddy2-naive-linux-${cpu}.tar.gz -f
+elif [ $chcaddynaive == "2" ]; then
+insupdate
+if [[ $release = Centos ]]; then 
+rpm --import https://mirror.go-repo.io/centos/RPM-GPG-KEY-GO-REPO
+curl -s https://mirror.go-repo.io/centos/go-repo.repo | tee /etc/yum.repos.d/go-repo.repo
+yum install golang && forwardproxy
+else
+apt install software-properties-common
+add-apt-repository ppa:longsleep/golang-backports 
+apt update 
+apt install golang-go && forwardproxy
+fi
 chmod +x caddy
 mv caddy /usr/bin/
 mkdir /etc/caddy
+else 
+red "输入错误，请重新选择" && inscaddynaive
+fi
+}
+
 
 
 inscertificate(){
-green "hysteria协议证书申请方式选择如下:"
+green "naiveproxy协议证书申请方式选择如下:"
 readp "1. acme一键申请证书（支持常规80端口模式与dns api模式），已有证书则自动识别（回车默认）\n2. 自定义证书路径\n请选择：" certificate
 if [ -z "${certificate}" ] || [ $certificate == "1" ]; then
 if [[ -f /root/cert.crt && -f /root/private.key ]] && [[ -s /root/cert.crt && -s /root/private.key ]]; then
