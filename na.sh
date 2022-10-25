@@ -255,7 +255,7 @@ systemctl enable caddy
 systemctl start caddy
 
 
-
+kba(){
 start_menu(){
 hysteriastatus
 clear
@@ -322,4 +322,4 @@ if [ $# == 0 ]; then
 start
 start_menu
 fi
-
+}
