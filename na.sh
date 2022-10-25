@@ -163,6 +163,9 @@ add-apt-repository ppa:longsleep/golang-backports
 apt update 
 apt install golang-go && forwardproxy
 fi
+if [[ ! -f /root/caddy ]]; then
+red "caddy2-naiveproxy构建失败，脚本退出" && exit
+fi
 chmod +x caddy
 mv caddy /usr/bin/
 mkdir /etc/caddy
