@@ -138,7 +138,14 @@ forwardproxy(){
 go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
 ~/go/bin/xcaddy build --with github.com/caddyserver/forwardproxy@caddy2=github.com/klzgrad/forwardproxy@naive
 }
-
+rest(){
+if [[ ! -f /root/caddy ]]; then
+red "caddy2-naiveproxy构建失败，脚本退出" && exit
+fi
+chmod +x caddy
+mv caddy /usr/bin/
+mkdir /etc/caddy
+}
 
 inscaddynaive(){
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
@@ -151,6 +158,7 @@ insupdate
 wget -N https://github.com/rkygogo/na/raw/main/caddy2-naive-linux-${cpu}.tar.gz
 tar zxvf caddy2-naive-linux-${cpu}.tar.gz
 rm caddy2-naive-linux-${cpu}.tar.gz -f
+rest
 elif [ $chcaddynaive == "2" ]; then
 insupdate
 if [[ $release = Centos ]]; then 
@@ -163,12 +171,7 @@ add-apt-repository ppa:longsleep/golang-backports
 apt update 
 apt install golang-go && forwardproxy
 fi
-if [[ ! -f /root/caddy ]]; then
-red "caddy2-naiveproxy构建失败，脚本退出" && exit
-fi
-chmod +x caddy
-mv caddy /usr/bin/
-mkdir /etc/caddy
+rest
 else 
 red "输入错误，请重新选择" && inscaddynaive
 fi
@@ -199,7 +202,7 @@ else
 wget -N https://gitlab.com/rwkgyg/acme-script/raw/main/acme.sh && bash acme.sh
 ym=$(cat /etc/hysteria/ca.log)
 if [[ ! -f /root/cert.crt && ! -f /root/private.key ]] && [[ ! -s /root/cert.crt && ! -s /root/private.key ]]; then
-red "域名申请失败，脚本退出" && exit
+red "证书申请失败，脚本退出" && exit
 fi
 fi
 certificatec='/root/cert.crt'
