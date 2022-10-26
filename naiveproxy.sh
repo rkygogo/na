@@ -543,7 +543,7 @@ green "当前v2rayn客户端配置文件v2rayn.json内容如下，保存到 /roo
 yellow "$(cat /root/naive/v2rayn.json)\n"
 green "当前naiveproxy节点分享链接如下，保存到 /root/naive/URL.txt"
 yellow "$(cat /root/naive/URL.txt)\n"
-green "当前naiveproxy节点二维码分享链接如下(SagerNet / Matsuri / 小火箭)"
+green "当前naiveproxy节点二维码分享链接如下(SagerNet / Matsuri)"
 qrencode -o - -t ANSIUTF8 "$(cat /root/naive/URL.txt)"
 }
 
@@ -557,8 +557,6 @@ green "naiveproxy服务启动成功"
 else
 red "naiveproxy服务启动失败，请运行systemctl status caddy查看服务状态并反馈，脚本退出" && exit
 fi
-naiveproxystatus
-white "$status\n"
 url="naive+https://${user}:${pswd}@${ym}:$port?padding=true#Naive-ygkkk"
 echo ${url} > /root/naive/URL.txt
 green "naiveproxy代理服务安装完成，生成脚本的快捷方式为 na"
@@ -566,7 +564,7 @@ blue "v2rayn客户端配置文件v2rayn.json保存到 /root/naive/v2rayn.json\n"
 yellow "$(cat /root/naive/v2rayn.json)\n"
 blue "分享链接保存到 /root/naive/URL.txt"
 yellow "${url}\n"
-green "二维码分享链接如下(SagerNet / Matsuri / 小火箭)"
+green "二维码分享链接如下(SagerNet / Matsuri)"
 qrencode -o - -t ANSIUTF8 "$(cat /root/naive/URL.txt)"
 }
 
