@@ -386,35 +386,35 @@ systemctl daemon-reload
 systemctl enable caddy
 systemctl start caddy
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
-green "naiveproxy安装成功" 
+green "naiveproxy服务启动成功" 
 else
-red "naiveproxy安装，请运行systemctl status caddy查看服务状态并反馈，脚本退出" && exit
+red "naiveproxy服务启动失败，请运行systemctl status caddy查看服务状态并反馈，脚本退出" && exit
 fi
 }
 
 
 stclre(){
-if [[ ! -f '/etc/hysteria/config.json' ]]; then
-red "未正常安装hysteria!" && exit
+if [[ ! -f '/etc/caddy/Caddyfile' ]]; then
+green "未正常安装naiveproxy" && exit
 fi
-green "hysteria服务执行以下操作"
+green "naiveproxy服务执行以下操作"
 readp "1. 重启\n2. 关闭\n3. 启动\n请选择：" action
 if [[ $action == "1" ]]; then
 systemctl restart caddy
-green "hysteria服务重启"
-hysteriastatus
+green "naiveproxy服务重启"
+naiveproxystatus
 white "$status\n"
 elif [[ $action == "2" ]]; then
 systemctl stop caddy
 systemctl disable caddy
-green "hysteria服务关闭"
-hysteriastatus
+green "naiveproxy服务关闭"
+naiveproxystatus
 white "$status\n"
 elif [[ $action == "3" ]]; then
 systemctl enable caddy
 systemctl start caddy
-green "hysteria服务开启"
-hysteriastatus
+green "naiveproxy服务开启"
+naiveproxystatus
 white "$status\n"
 else
 red "输入错误,请重新选择" && stclre
@@ -423,6 +423,19 @@ fi
 
 cfwarp(){
 wget -N --no-check-certificate https://gitlab.com/rwkgyg/cfwarp/raw/main/CFwarp.sh && bash CFwarp.sh
+}
+
+naiveproxystatus(){
+wgcfv6=$(curl -s6m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2) 
+wgcfv4=$(curl -s4m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+[[ ! $wgcfv4 =~ on|plus && ! $wgcfv6 =~ on|plus ]] && wgcf=$(green "未启用") || wgcf=$(green "启用中")
+if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
+status=$(white "naiveproxy状态：\c";green "运行中";white "hysteria协议：\c";green "$noprotocol";white "WARP状态：    \c";eval echo \$wgcf)
+elif [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/hysteria/config.json' ]]; then
+status=$(white "naiveproxy状态：\c";yellow "未启动,可尝试选择4，开启或者重启naiveproxy";white "WARP状态：    \c";eval echo \$wgcf)
+else
+status=$(white "naiveproxy状态：\c";red "未安装";white "WARP状态：    \c";eval echo \$wgcf)
+fi
 }
 
 
