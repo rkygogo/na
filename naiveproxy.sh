@@ -204,8 +204,12 @@ oldcer=`cat /etc/caddy/caddy_server.json 2>/dev/null | grep -w certificate | awk
 oldkey=`cat /etc/caddy/caddy_server.json 2>/dev/null | grep -w key | awk '{print $2}' | awk -F '"' '{ print $2}'| awk -F ',' '{ print $NF}'`
 sed -i "s/$oldcer/${certificatec}/g" /etc/caddy/caddy_server.json
 sed -i "s/$oldkey/${certificatep}/g" /etc/caddy/caddy_server.json
-readp "请输入已放置好证书的路径（/a/b/……/cert.crt）：" cerroad
-readp "请输入已放置好证书的路径（/a/b/……/private.key）：" keyroad
+readp "请输入已解析好的域名:" ym
+blue "已解析好的域名：$ym "
+readp "请输入已放置好的公钥文件crt的路径（/a/b/……/cert.crt）：" cerroad
+blue "公钥文件crt的路径：$cerroad "
+readp "请输入已放置好的密钥文件key的路径（/a/b/……/private.key）：" keyroad
+blue "密钥文件key的路径：$keyroad "
 certificatec=$cerroad
 certificatep=$keyroad
 else 
