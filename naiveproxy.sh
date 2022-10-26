@@ -442,7 +442,6 @@ elif [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/hy
 status=$(white "naiveproxy状态：\c";yellow "未启动,可尝试选择4，开启或者重启naiveproxy";white "WARP状态：    \c";eval echo \$wgcf)
 else
 status=$(white "naiveproxy状态：\c";red "未安装";white "WARP状态：    \c";eval echo \$wgcf)
-red "naiveproxy服务启动失败，请运行systemctl status caddy查看服务状态并反馈" && exit
 fi
 }
 
@@ -551,8 +550,13 @@ insna(){
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
 green "已安装naiveproxy，重装请先执行卸载功能" && exit
 fi
-inscaddynaive ; inscertificate ; insport ; insuser ; inspswd ; insconfig
-insservice && naiveproxystatus
+inscaddynaive ; inscertificate ; insport ; insuser ; inspswd ; insconfig ; insservice
+if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
+green "naiveproxy服务启动成功"
+else
+red "naiveproxy服务启动失败，请运行systemctl status caddy查看服务状态并反馈，脚本退出" && exit
+fi
+naiveproxystatus
 white "$status\n"
 url="naive+https://${user}:${pswd}@${ym}:$port?padding=true#Naive-ygkkk"
 echo ${url} > /root/naive/URL.txt
