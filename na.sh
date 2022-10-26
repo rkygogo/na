@@ -1,5 +1,5 @@
 #!/bin/bash
-hyygV="22.8.29 V 3.3"
+naygV="22.8.29 V 3.3"
 remoteV=`wget -qO- https://gitlab.com/rwkgyg/hysteria-yg/raw/main/hysteria.sh | sed  -n 2p | cut -d '"' -f 2`
 
 red='\033[0;31m'
@@ -11,7 +11,7 @@ green(){ echo -e "\033[32m\033[01m$1\033[0m";}
 yellow(){ echo -e "\033[33m\033[01m$1\033[0m";}
 white(){ echo -e "\033[37m\033[01m$1\033[0m";}
 readp(){ read -p "$(yellow "$1")" $2;}
-[[ $EUID -ne 0 ]] && yellow "请以root模式运行脚本" && exit 1
+[[ $EUID -ne 0 ]] && yellow "请以root模式运行脚本" && exit
 yellow " 请稍等3秒……正在扫描vps类型及参数中……"
 if [[ -f /etc/redhat-release ]]; then
 release="Centos"
@@ -28,7 +28,7 @@ release="Ubuntu"
 elif cat /proc/version | grep -q -E -i "centos|red hat|redhat"; then
 release="Centos"
 else 
-red "不支持你当前系统，请选择使用Ubuntu,Debian,Centos系统。" && exit 1
+red "不支持你当前系统，请选择使用Ubuntu,Debian,Centos系统。" && exit
 fi
 vsid=`grep -i version_id /etc/os-release | cut -d \" -f2 | cut -d . -f1`
 sys(){
@@ -46,7 +46,7 @@ cpu=amd64
 elif [[ $bit = aarch64 ]]; then
 cpu=arm64
 else
-red "VPS的CPU架构为$bit 不支持当前系统的CPU架构，请使用amd64或arm64架构的CPU运行脚本" && exit 1
+red "VPS的CPU架构为$bit 不支持当前系统的CPU架构，请使用amd64或arm64架构的CPU运行脚本" && exit
 
 vi=`systemd-detect-virt`
 rm -rf /etc/localtime
@@ -64,6 +64,7 @@ systemctl start wg-quick@wgcf >/dev/null 2>&1
 fi
 }
 
+start(){
 if [[ $vi = openvz ]]; then
 TUN=$(cat /dev/net/tun 2>&1)
 if [[ ! $TUN =~ 'in bad state' ]] && [[ ! $TUN =~ '处于错误状态' ]] && [[ ! $TUN =~ 'Die Dateizugriffsnummer ist in schlechter Verfassung' ]]; then 
@@ -74,7 +75,7 @@ mknod net/tun c 10 200
 chmod 0666 net/tun
 TUN=$(cat /dev/net/tun 2>&1)
 if [[ ! $TUN =~ 'in bad state' ]] && [[ ! $TUN =~ '处于错误状态' ]] && [[ ! $TUN =~ 'Die Dateizugriffsnummer ist in schlechter Verfassung' ]]; then 
-green "添加TUN支持失败，建议与VPS厂商沟通或后台设置开启" && exit 0
+green "添加TUN支持失败，建议与VPS厂商沟通或后台设置开启" && exit
 else
 green "恭喜，添加TUN支持成功，现添加TUN守护功能" && sleep 4
 cat>/root/tun.sh<<-\EOF
@@ -118,6 +119,7 @@ systemctl disable httpd.service >/dev/null 2>&1
 service apache2 stop >/dev/null 2>&1
 systemctl disable apache2 >/dev/null 2>&1
 fi
+}
 
 insupdate(){
 rm /usr/bin/caddy
@@ -439,28 +441,58 @@ fi
 }
 
 
- cat <<EOF > /root/naive-client.json
+ cat <<EOF > /root/naive/v2rayn.json
 {
   "listen": "socks://127.0.0.1:1080",
-  "proxy": "https://${proxyname}:${proxypwd}@${domain}",
-  "log": ""
+  "proxy": "https://${user}:${pswd}@${ym}",
 }
 EOF
 
-    url="naive+https://${proxyname}:${proxypwd}@${domain}:443?padding=true#Naive"
-    echo $url > /root/naive-url.txt
-
- green "NaiveProxy 已安装成功！"
-    yellow "客户端配置文件已保存至 /root/naive-client.json"
-    yellow "Qv2ray / SagerNet / Matsuri 分享链接已保存至 /root/naive-url.txt"
-    yellow "SagerNet / Matsuri 分享二维码如下："
-    qrencode -o - -t ANSIUTF8 "$url"
 
 
+url="naive+https://${user}:${pswd}@${ym}:$port?padding=true#Naive-ygkkk"
+echo ${url} > /root/naive/URL.txt
+green "naiveproxy代理服务安装完成，生成脚本的快捷方式为 na"
+blue "v2rayn客户端配置文件v2rayn.json保存到 /root/naive/v2rayn.json\n"
+yellow "$(cat /root/naive/v2rayn.json)\n"
+blue "分享链接保存到 /root/naive/URL.txt"
+yellow "${url}\n"
+green "二维码分享链接如下(SagerNet / Matsuri / 小火箭)"
+qrencode -o - -t ANSIUTF8 "$(cat /root/naive/URL.txt)"
 
-kba(){
+
+naiveproxyshare(){
+if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
+red "未正常安装naiveproxy" && exit
+fi
+green "当前v2rayn客户端配置文件v2rayn.json内容如下，保存到 /root/HY/acl/v2rayn.json\n"
+yellow "$(cat /root/HY/acl/v2rayn.json)\n"
+green "当前naiveproxy节点分享链接如下，保存到 /root/naive/URL.txt"
+yellow "$(cat /root/naive/URL.txt)\n"
+green "当前naiveproxy节点二维码分享链接如下(SagerNet / Matsuri / 小火箭)"
+qrencode -o - -t ANSIUTF8 "$(cat /root/naive/URL.txt)"
+}
+
+upnayg(){
+if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
+red "未正常安装naiveproxy" && exit
+fi
+wget -N https://gitlab.com/rwkgyg/naiveproxy-yg/raw/main/naiveproxy.sh
+chmod +x /root/naiveproxy.sh 
+ln -sf /root/naiveproxy.sh /usr/bin/na
+green "naiveproxy-yg安装脚本升级成功"
+}
+
+unins(){
+systemctl stop caddy >/dev/null 2>&1
+systemctl disable caddy >/dev/null 2>&1
+rm -rf /usr/bin/caddy /etc/caddy /root/naive /root/naiveproxy.sh /usr/bin/na
+green "naiveproxy卸载完成！"
+}
+
+
 start_menu(){
-hysteriastatus
+naiveproxystatus
 clear
 green "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"           
 echo -e "${bblue} ░██     ░██      ░██ ██ ██         ░█${plain}█   ░██     ░██   ░██     ░█${red}█   ░██${plain}  "
@@ -481,27 +513,18 @@ white "-------------------------------------------------------------------------
 green " 3. 四大配置变更（证书、用户名、密码、端口）" 
 green " 4. 关闭、开启、重启naiveproxy"   
 green " 5. 更新naiveproxy-yg安装脚本"  
-green " 6. 更新naiveproxy内核"
 white "----------------------------------------------------------------------------------"
-green " 7. 显示当前naiveproxy分享链接、V2rayN配置文件、二维码"
-green " 8. 安装warp（可选）"
+green " 6. 显示当前naiveproxy分享链接、V2rayN配置文件、二维码"
+green " 7. 安装warp（可选）"
 green " 8. 安装bbr加速（可选）"
 green " 0. 退出脚本"
 red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-if [[ -n $(systemctl status hysteria-server 2>/dev/null | grep -w active) && -f '/etc/hysteria/config.json' ]]; then
-if [ "${hyygV}" = "${remoteV}" ]; then
-green "当前naiveproxy-yg安装脚本版本号：${hyygV} ，已是最新版本\n"
+if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
+if [ "${naygV}" = "${remoteV}" ]; then
+green "当前naiveproxy-yg安装脚本版本号：${naygV} ，已是最新版本\n"
 else
-green "当前naiveproxy-yg安装脚本版本号：${hyygV}"
-yellow "检测到最新hysteria-yg安装脚本版本号：${remoteV} ，可选择5进行更新\n"
-fi
-loVERSION="$(/usr/local/bin/hysteria -v | awk 'NR==1 {print $3}')"
-hyVERSION="v$(curl -Ls "https://data.jsdelivr.com/v1/package/resolve/gh/HyNetwork/Hysteria" | grep '"version":' | sed -E 's/.*"([^"]+)".*/\1/')"
-if [ "${loVERSION}" = "${hyVERSION}" ]; then
-green "当前hysteria内核版本号：${loVERSION} ，已是最新版本\n"
-else
-green "当前hysteria内核版本号：${loVERSION}"
-yellow "检测到最新hysteria内核版本号：${hyVERSION} ，可选择6进行更新\n"
+green "当前naiveproxy-yg安装脚本版本号：${naygV}"
+yellow "检测到最新naiveproxy-yg安装脚本版本号：${remoteV} ，可选择5进行更新\n"
 fi
 fi
 white "VPS系统信息如下："
@@ -525,4 +548,3 @@ if [ $# == 0 ]; then
 start
 start_menu
 fi
-}
