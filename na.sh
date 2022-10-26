@@ -218,6 +218,10 @@ fi
 certificatec='/root/cert.crt'
 certificatep='/root/private.key'
 elif [ $certificate == "2" ]; then
+oldcer=`cat /etc/caddy/caddy_server.json 2>/dev/null | grep -w certificate | awk '{print $2}' | awk -F '"' '{ print $2}'| awk -F ',' '{ print $NF}'`
+oldkey=`cat /etc/caddy/caddy_server.json 2>/dev/null | grep -w key | awk '{print $2}' | awk -F '"' '{ print $2}'| awk -F ',' '{ print $NF}'`
+sed -i "s/$oldcer/${certificatec}/g" /etc/caddy/caddy_server.json
+sed -i "s/$oldkey/${certificatep}/g" /etc/caddy/caddy_server.json
 readp "请输入已放置好证书的路径（/a/b/……/cert.crt）：" cerroad
 readp "请输入已放置好证书的路径（/a/b/……/private.key）：" keyroad
 certificatec=$cerroad
@@ -505,16 +509,21 @@ red "请重新选择" && changeserv
 fi
 }
 
+sussnaiveproxy(){
+systemctl restart caddy
+if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
+green "naiveproxy服务启动成功" && naiveproxyshare
+else
+red "naiveproxy服务启动失败，请运行systemctl status caddy查看服务状态并反馈，脚本退出" && exit
+fi
+}
+
 changecertificate(){
 if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
 red "未正常安装naiveproxy" && exit
 fi
-
 inscertificate
-/etc/caddy/caddy_server.json
-
-systemctl restart caddy
-naiveproxyshare
+sussnaiveproxy
 }
 
 changeuser(){
@@ -527,8 +536,7 @@ insuser
 /etc/caddy/Caddyfile
 /etc/caddy/caddy_server.json
 
-systemctl restart caddy
-naiveproxyshare
+sussnaiveproxy
 }
 
 changepswd(){
@@ -541,8 +549,7 @@ inspswd
 /etc/caddy/Caddyfile
 /etc/caddy/caddy_server.json
 
-systemctl restart caddy
-naiveproxyshare
+sussnaiveproxy
 }
 
 changeport(){
@@ -554,8 +561,7 @@ insport
 
 /etc/caddy/Caddyfile
 
-systemctl restart caddy
-naiveproxyshare
+sussnaiveproxy
 }
 
 
