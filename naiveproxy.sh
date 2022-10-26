@@ -252,7 +252,8 @@ blue "已确认密码：${pswd}\n"
 }
 
 insconfig(){
-green "设置naiveproxy配置文件……"    
+green "设置naiveproxy配置文件……"
+mkdir -p /root/naive
 cat << EOF >/etc/caddy/Caddyfile
 {
 https_port $port
