@@ -363,6 +363,13 @@ cat << EOF >/etc/caddy/caddy_server.json
  }
 }
 EOF
+
+cat <<EOF > /root/naive/v2rayn.json
+{
+  "listen": "socks://127.0.0.1:1080",
+  "proxy": "https://${user}:${pswd}@${ym}"
+}
+EOF
 }
 
 insservice(){
@@ -439,14 +446,6 @@ else
 status=$(white "naiveproxy状态：\c";red "未安装";white "WARP状态：    \c";eval echo \$wgcf)
 fi
 }
-
-
- cat <<EOF > /root/naive/v2rayn.json
-{
-  "listen": "socks://127.0.0.1:1080",
-  "proxy": "https://${user}:${pswd}@${ym}",
-}
-EOF
 
 
 
