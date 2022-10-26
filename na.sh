@@ -46,11 +46,18 @@ cpu=amd64
 elif [[ $bit = aarch64 ]]; then
 cpu=arm64
 else
-red "VPS的CPU架构为$bit 不支持当前系统的CPU架构，请使用amd64或arm64架构的CPU运行脚本" && exit
+red "VPS的CPU架构为$bit 脚本不支持当前CPU架构，请使用amd64或arm64架构的CPU运行脚本" && exit
 
 vi=`systemd-detect-virt`
 rm -rf /etc/localtime
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+if [[ -n $(sysctl net.ipv4.tcp_congestion_control 2>/dev/null | awk -F ' ' '{print $3}') ]]; then
+bbr=`sysctl net.ipv4.tcp_congestion_control | awk -F ' ' '{print $3}'`
+elif [[ -n $(ping 10.0.0.2 -c 2 | grep ttl) ]]; then
+bbr="openvz版bbr-plus"
+else
+bbr="暂不支持显示"
+fi
 
 wgcfgo(){
 wgcfv6=$(curl -s6m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
@@ -434,10 +441,15 @@ cfwarp(){
 wget -N --no-check-certificate https://gitlab.com/rwkgyg/cfwarp/raw/main/CFwarp.sh && bash CFwarp.sh
 }
 
+bbr(){
+bash <(curl -L -s https://raw.githubusercontents.com/teddysun/across/master/bbr.sh)
+}
+
 naiveproxystatus(){
 wgcfv6=$(curl -s6m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2) 
 wgcfv4=$(curl -s4m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
 [[ ! $wgcfv4 =~ on|plus && ! $wgcfv6 =~ on|plus ]] && wgcf=$(green "未启用") || wgcf=$(green "启用中")
+
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
 status=$(white "naiveproxy状态：\c";green "运行中";white "WARP状态：    \c";eval echo \$wgcf)
 elif [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/hysteria/config.json' ]]; then
@@ -447,17 +459,6 @@ status=$(white "naiveproxy状态：\c";red "未安装";white "WARP状态：    \
 fi
 }
 
-
-
-url="naive+https://${user}:${pswd}@${ym}:$port?padding=true#Naive-ygkkk"
-echo ${url} > /root/naive/URL.txt
-green "naiveproxy代理服务安装完成，生成脚本的快捷方式为 na"
-blue "v2rayn客户端配置文件v2rayn.json保存到 /root/naive/v2rayn.json\n"
-yellow "$(cat /root/naive/v2rayn.json)\n"
-blue "分享链接保存到 /root/naive/URL.txt"
-yellow "${url}\n"
-green "二维码分享链接如下(SagerNet / Matsuri / 小火箭)"
-qrencode -o - -t ANSIUTF8 "$(cat /root/naive/URL.txt)"
 
 
 naiveproxyshare(){
@@ -489,6 +490,20 @@ rm -rf /usr/bin/caddy /etc/caddy /root/naive /root/naiveproxy.sh /usr/bin/na
 green "naiveproxy卸载完成！"
 }
 
+insna(){
+start ; inscaddynaive ; inscertificate ; insport ; insuser ; inspswd ; insconfig
+insservice && naiveproxystatus
+white "$status\n"
+url="naive+https://${user}:${pswd}@${ym}:$port?padding=true#Naive-ygkkk"
+echo ${url} > /root/naive/URL.txt
+green "naiveproxy代理服务安装完成，生成脚本的快捷方式为 na"
+blue "v2rayn客户端配置文件v2rayn.json保存到 /root/naive/v2rayn.json\n"
+yellow "$(cat /root/naive/v2rayn.json)\n"
+blue "分享链接保存到 /root/naive/URL.txt"
+yellow "${url}\n"
+green "二维码分享链接如下(SagerNet / Matsuri / 小火箭)"
+qrencode -o - -t ANSIUTF8 "$(cat /root/naive/URL.txt)"
+}
 
 start_menu(){
 naiveproxystatus
@@ -527,19 +542,19 @@ yellow "检测到最新naiveproxy-yg安装脚本版本号：${remoteV} ，可选
 fi
 fi
 white "VPS系统信息如下："
-white "操作系统:     $(blue "$op")" && white "内核版本:     $(blue "$version")" && white "CPU架构 :     $(blue "$cpu")" && white "虚拟化类型:   $(blue "$vi")"
+white "操作系统:     $(blue "$op")" && white "内核版本:     $(blue "$version")" && white "CPU架构 :     $(blue "$cpu")" && white "虚拟化类型:   $(blue "$vi")" white "TCP加速算法   : $(blue "$bbr")"
 white "$status"
 echo
 readp "请输入数字:" Input
 case "$Input" in     
- 1 ) inshysteria;;
+ 1 ) insna;;
  2 ) unins;;
  3 ) changeserv;;
  4 ) stclre;;
- 5 ) uphyyg;; 
- 6 ) uphysteriacore;;
- 7 ) hysteriashare;;
- 8 ) cfwarp;;
+ 5 ) upnayg;; 
+ 6 ) naiveproxyshare;;
+ 7 ) cfwarp;;
+ 8 ) bbr;;
  * ) exit 
 esac
 }
