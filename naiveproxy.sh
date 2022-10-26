@@ -172,8 +172,6 @@ red "输入错误，请重新选择" && inscaddynaive
 fi
 }
 
-
-
 inscertificate(){
 green "naiveproxy协议证书申请方式选择如下:"
 readp "1. acme一键申请证书（支持常规80端口模式与dns api模式），已有证书则自动识别（回车默认）\n2. 自定义证书路径\n请选择：" certificate
@@ -392,6 +390,8 @@ systemctl enable caddy
 systemctl start caddy
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
 green "naiveproxy服务启动成功" 
+chmod +x /root/naiveproxy.sh 
+ln -sf /root/naiveproxy.sh /usr/bin/na
 else
 red "naiveproxy服务启动失败，请运行systemctl status caddy查看服务状态并反馈，脚本退出" && exit
 fi
