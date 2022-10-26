@@ -391,12 +391,6 @@ EOF
 systemctl daemon-reload
 systemctl enable caddy
 systemctl start caddy
-if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
-green "naiveproxy服务启动成功" 
-
-else
-
-fi
 }
 
 
