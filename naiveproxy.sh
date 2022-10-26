@@ -118,7 +118,6 @@ fi
 }
 
 insupdate(){
-rm /usr/bin/caddy
 if [[ $release = Centos ]]; then
 if [[ ${vsid} =~ 8 ]]; then
 cd /etc/yum.repos.d/ && mkdir backup && mv *repo backup/ 
@@ -175,32 +174,31 @@ fi
 
 inscertificate(){
 green "naiveproxy协议证书申请方式选择如下:"
-readp "1. acme一键申请证书（支持常规80端口模式与dns api模式），已有证书则自动识别（回车默认）\n2. 自定义证书路径\n请选择：" certificate
+readp "1. acme一键申请证书脚本（支持常规80端口模式与dns api模式），已用此脚本申请的证书则自动识别（回车默认）\n2. 自定义证书路径\n请选择：" certificate
 if [ -z "${certificate}" ] || [ $certificate == "1" ]; then
-if [[ -f /root/cert.crt && -f /root/private.key ]] && [[ -s /root/cert.crt && -s /root/private.key ]]; then
-blue "经检测，之前已申请过acme证书"
-readp "1. 直接使用原来的证书，默认root路径（回车默认）\n2. 删除原来的证书，重新申请acme证书\n请选择：" certacme
+if [[ -f /root/ygkkkca/cert.crt && -f /root/ygkkkca/private.key ]] && [[ -s /root/ygkkkca/cert.crt && -s /root/ygkkkca/private.key ]] && [[ -f /root/ygkkkca/ca.log ]]; then
+blue "经检测，之前已使用此acme脚本申请过证书"
+readp "1. 直接使用原来的证书，（回车默认）\n2. 删除原来的证书，重新申请证书\n请选择：" certacme
 if [ -z "${certacme}" ] || [ $certacme == "1" ]; then
-readp "请输入已申请过的acme证书域名:" ym
-echo ${ym} > /etc/hysteria/ca.log
-blue "输入的域名：$ym ，已直接引用\n"
+ym=$(cat /root/ygkkkca/ca.log)
+blue "检测到的域名：$ym ，已直接引用\n"
 elif [ $certacme == "2" ]; then
-rm -rf /root/cert.crt /root/private.key
+rm -rf /root/ygkkkca
 wget -N https://gitlab.com/rwkgyg/acme-script/raw/main/acme.sh && bash acme.sh
-ym=$(cat /etc/hysteria/ca.log)
-if [[ ! -f /root/cert.crt && ! -f /root/private.key ]] && [[ ! -s /root/cert.crt && ! -s /root/private.key ]]; then
+ym=$(cat /root/ygkkkca/ca.log)
+if [[ ! -f /root/ygkkkca/cert.crt && ! -f /root/ygkkkca/private.key ]] && [[ ! -s /root/ygkkkca/cert.crt && ! -s /root/ygkkkca/private.key ]]; then
 red "证书申请失败，脚本退出" && exit
 fi
 fi
 else
 wget -N https://gitlab.com/rwkgyg/acme-script/raw/main/acme.sh && bash acme.sh
-ym=$(cat /etc/hysteria/ca.log)
-if [[ ! -f /root/cert.crt && ! -f /root/private.key ]] && [[ ! -s /root/cert.crt && ! -s /root/private.key ]]; then
+ym=$(cat /root/ygkkkca/ca.log)
+if [[ ! -f /root/ygkkkca/cert.crt && ! -f /root/ygkkkca/private.key ]] && [[ ! -s /root/ygkkkca/cert.crt && ! -s /root/ygkkkca/private.key ]]; then
 red "证书申请失败，脚本退出" && exit
 fi
 fi
-certificatec='/root/cert.crt'
-certificatep='/root/private.key'
+certificatec='/root/ygkkkca/cert.crt'
+certificatep='/root/ygkkkca/private.key'
 elif [ $certificate == "2" ]; then
 oldcer=`cat /etc/caddy/caddy_server.json 2>/dev/null | grep -w certificate | awk '{print $2}' | awk -F '"' '{ print $2}'| awk -F ',' '{ print $NF}'`
 oldkey=`cat /etc/caddy/caddy_server.json 2>/dev/null | grep -w key | awk '{print $2}' | awk -F '"' '{ print $2}'| awk -F ',' '{ print $NF}'`
@@ -236,7 +234,7 @@ blue "已确认端口：$port\n"
 insuser(){
 readp "设置naiveproxy用户名（回车跳过为随机6位字符）：" user
 if [[ -z ${user} ]]; then
-pswd=`date +%s%N |md5sum | cut -c 1-6`
+user=`date +%s%N |md5sum | cut -c 1-6`
 fi
 blue "已确认用户名：${user}\n"
 }
@@ -391,10 +389,9 @@ systemctl enable caddy
 systemctl start caddy
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
 green "naiveproxy服务启动成功" 
-chmod +x /root/naiveproxy.sh 
-ln -sf /root/naiveproxy.sh /usr/bin/na
+
 else
-red "naiveproxy服务启动失败，请运行systemctl status caddy查看服务状态并反馈，脚本退出" && exit
+
 fi
 }
 
@@ -440,11 +437,14 @@ wgcfv6=$(curl -s6m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cu
 wgcfv4=$(curl -s4m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
 [[ ! $wgcfv4 =~ on|plus && ! $wgcfv6 =~ on|plus ]] && wgcf=$(green "未启用") || wgcf=$(green "启用中")
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
+chmod +x /root/naiveproxy.sh 
+ln -sf /root/naiveproxy.sh /usr/bin/na
 status=$(white "naiveproxy状态：\c";green "运行中";white "WARP状态：    \c";eval echo \$wgcf)
 elif [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/hysteria/config.json' ]]; then
 status=$(white "naiveproxy状态：\c";yellow "未启动,可尝试选择4，开启或者重启naiveproxy";white "WARP状态：    \c";eval echo \$wgcf)
 else
 status=$(white "naiveproxy状态：\c";red "未安装";white "WARP状态：    \c";eval echo \$wgcf)
+red "naiveproxy服务启动失败，请运行systemctl status caddy查看服务状态并反馈" && exit
 fi
 }
 
