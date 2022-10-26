@@ -553,7 +553,7 @@ insna(){
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
 green "已安装naiveproxy，重装请先执行卸载功能" && exit
 fi
-start ; inscaddynaive ; inscertificate ; insport ; insuser ; inspswd ; insconfig
+inscaddynaive ; inscertificate ; insport ; insuser ; inspswd ; insconfig
 insservice && naiveproxystatus
 white "$status\n"
 url="naive+https://${user}:${pswd}@${ym}:$port?padding=true#Naive-ygkkk"
