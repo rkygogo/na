@@ -449,7 +449,6 @@ naiveproxystatus(){
 wgcfv6=$(curl -s6m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2) 
 wgcfv4=$(curl -s4m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
 [[ ! $wgcfv4 =~ on|plus && ! $wgcfv6 =~ on|plus ]] && wgcf=$(green "未启用") || wgcf=$(green "启用中")
-
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
 status=$(white "naiveproxy状态：\c";green "运行中";white "WARP状态：    \c";eval echo \$wgcf)
 elif [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/hysteria/config.json' ]]; then
@@ -458,8 +457,6 @@ else
 status=$(white "naiveproxy状态：\c";red "未安装";white "WARP状态：    \c";eval echo \$wgcf)
 fi
 }
-
-
 
 naiveproxyshare(){
 if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
@@ -489,6 +486,79 @@ systemctl disable caddy >/dev/null 2>&1
 rm -rf /usr/bin/caddy /etc/caddy /root/naive /root/naiveproxy.sh /usr/bin/na
 green "naiveproxy卸载完成！"
 }
+
+changeserv(){
+green "naiveproxy配置变更选择如下:"
+readp "1. 变更证书\n2. 变更用户名\n3. 变更密码\n4. 变更端口\n5. 返回上层\n请选择：" choose
+if [ $choose == "1" ];then
+changecertificate
+elif [ $choose == "2" ];then
+changeuser
+elif [ $choose == "3" ];then
+changepswd
+elif [ $choose == "4" ];then
+changeport
+elif [ $choose == "5" ];then
+na
+else 
+red "请重新选择" && changeserv
+fi
+}
+
+changecertificate(){
+if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
+red "未正常安装naiveproxy" && exit
+fi
+
+inscertificate
+/etc/caddy/caddy_server.json
+
+systemctl restart caddy
+naiveproxyshare
+}
+
+changeuser(){
+if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
+red "未正常安装naiveproxy" && exit
+fi
+
+insuser
+
+/etc/caddy/Caddyfile
+/etc/caddy/caddy_server.json
+
+systemctl restart caddy
+naiveproxyshare
+}
+
+changepswd(){
+if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
+red "未正常安装naiveproxy" && exit
+fi
+
+inspswd
+
+/etc/caddy/Caddyfile
+/etc/caddy/caddy_server.json
+
+systemctl restart caddy
+naiveproxyshare
+}
+
+changeport(){
+if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
+red "未正常安装naiveproxy" && exit
+fi
+
+insport
+
+/etc/caddy/Caddyfile
+
+systemctl restart caddy
+naiveproxyshare
+}
+
+
 
 insna(){
 start ; inscaddynaive ; inscertificate ; insport ; insuser ; inspswd ; insconfig
