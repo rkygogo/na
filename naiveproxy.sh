@@ -604,7 +604,7 @@ yellow "检测到最新naiveproxy-yg安装脚本版本号：${remoteV} ，可选
 fi
 fi
 white "VPS系统信息如下："
-white "操作系统:     $(blue "$op")" && white "内核版本:     $(blue "$version")" && white "CPU架构 :     $(blue "$cpu")" && white "虚拟化类型:   $(blue "$vi")" white "TCP加速算法   : $(blue "$bbr")"
+white "操作系统:     $(blue "$op")" && white "内核版本:     $(blue "$version")" && white "CPU架构 :     $(blue "$cpu")" && white "虚拟化类型:   $(blue "$vi")" && white "TCP加速算法   : $(blue "$bbr")"
 white "$status"
 echo
 readp "请输入数字:" Input
