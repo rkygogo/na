@@ -1,7 +1,7 @@
 #!/bin/bash
-naygV="22.8.29 V 3.3"
-remoteV=`wget -qO- https://gitlab.com/rwkgyg/hysteria-yg/raw/main/hysteria.sh | sed  -n 2p | cut -d '"' -f 2`
-
+naygV="22.10.30 V 1.0"
+remoteV=`wget -qO- https://gitlab.com/rwkgyg/naiveproxy-yg/raw/main/naiveproxy.sh | sed  -n 2p | cut -d '"' -f 2`
+chmod +x /root/naive.sh
 red='\033[0;31m'
 bblue='\033[0;34m'
 plain='\033[0m'
