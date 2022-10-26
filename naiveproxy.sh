@@ -1,7 +1,7 @@
 #!/bin/bash
 naygV="22.10.30 V 1.0"
 remoteV=`wget -qO- https://gitlab.com/rwkgyg/naiveproxy-yg/raw/main/naiveproxy.sh | sed  -n 2p | cut -d '"' -f 2`
-chmod +x /root/naive.sh
+chmod +x /root/naiveproxy.sh
 red='\033[0;31m'
 bblue='\033[0;34m'
 plain='\033[0m'
