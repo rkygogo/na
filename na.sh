@@ -462,18 +462,6 @@ status=$(white "naiveproxy状态：\c";red "未安装";white "WARP状态：    \
 fi
 }
 
-naiveproxyshare(){
-if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
-red "未正常安装naiveproxy" && exit
-fi
-green "当前v2rayn客户端配置文件v2rayn.json内容如下，保存到 /root/HY/acl/v2rayn.json\n"
-yellow "$(cat /root/HY/acl/v2rayn.json)\n"
-green "当前naiveproxy节点分享链接如下，保存到 /root/naive/URL.txt"
-yellow "$(cat /root/naive/URL.txt)\n"
-green "当前naiveproxy节点二维码分享链接如下(SagerNet / Matsuri / 小火箭)"
-qrencode -o - -t ANSIUTF8 "$(cat /root/naive/URL.txt)"
-}
-
 upnayg(){
 if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
 red "未正常安装naiveproxy" && exit
@@ -492,10 +480,14 @@ green "naiveproxy卸载完成！"
 }
 
 changeserv(){
+if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
+red "未正常安装naiveproxy" && exit
+fi
 green "naiveproxy配置变更选择如下:"
 readp "1. 变更证书\n2. 变更用户名\n3. 变更密码\n4. 变更端口\n5. 返回上层\n请选择：" choose
 if [ $choose == "1" ];then
-changecertificate
+inscertificate
+sussnaiveproxy
 elif [ $choose == "2" ];then
 changeuser
 elif [ $choose == "3" ];then
@@ -518,53 +510,53 @@ red "naiveproxy服务启动失败，请运行systemctl status caddy查看服务�
 fi
 }
 
-changecertificate(){
-if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
-red "未正常安装naiveproxy" && exit
-fi
-inscertificate
-sussnaiveproxy
-}
-
 changeuser(){
-if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
-red "未正常安装naiveproxy" && exit
-fi
-
+oldusers=`cat /etc/caddy/caddy_server.json 2>/dev/null | grep -w auth_user_deprecated | awk '{print $2}' | awk -F '"' '{ print $2}'| awk -F ',' '{ print $NF}'`
+olduserc=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 8p | awk '{print $2}'`
+echo
+blue "当前正在使用的用户名：$oldusers"
+echo
 insuser
-
-/etc/caddy/Caddyfile
-/etc/caddy/caddy_server.json
-
+sed -i "13s/$oldusers/${user}/g" /etc/caddy/caddy_server.json
+sed -i "8s/$olduserc/${user}/g" /etc/caddy/Caddyfile
 sussnaiveproxy
 }
 
 changepswd(){
-if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
-red "未正常安装naiveproxy" && exit
-fi
-
+oldpswds=`cat /etc/caddy/caddy_server.json 2>/dev/null | grep -w auth_pass_deprecated | awk '{print $2}' | awk -F '"' '{ print $2}'| awk -F ',' '{ print $NF}'`
+oldpswdc=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 8p | awk '{print $3}'`
+echo
+blue "当前正在使用的密码：$oldpswds"
+echo
 inspswd
-
-/etc/caddy/Caddyfile
-/etc/caddy/caddy_server.json
-
+sed -i "14s/$oldpswds/${pswd}/g" /etc/caddy/caddy_server.json
+sed -i "8s/$oldpswdc/${pswd}/g" /etc/caddy/Caddyfile
 sussnaiveproxy
 }
 
 changeport(){
-if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
-red "未正常安装naiveproxy" && exit
-fi
-
+oldport1=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $2}'` 
+oldport2=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 4p | awk '{print $1}' | tr -d ',:'`
+echo
+blue "当前正在使用的端口：$oldport1"
+echo
 insport
-
-/etc/caddy/Caddyfile
-
+sed -i "2s/$oldport1/$port/g" /etc/caddy/Caddyfile
+sed -i "4s/$oldport2/$port/g" /etc/caddy/Caddyfile
 sussnaiveproxy
 }
 
-
+naiveproxyshare(){
+if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
+red "未正常安装naiveproxy" && exit
+fi
+green "当前v2rayn客户端配置文件v2rayn.json内容如下，保存到 /root/naive/v2rayn.json\n"
+yellow "$(cat /root/naive/v2rayn.json)\n"
+green "当前naiveproxy节点分享链接如下，保存到 /root/naive/URL.txt"
+yellow "$(cat /root/naive/URL.txt)\n"
+green "当前naiveproxy节点二维码分享链接如下(SagerNet / Matsuri / 小火箭)"
+qrencode -o - -t ANSIUTF8 "$(cat /root/naive/URL.txt)"
+}
 
 insna(){
 start ; inscaddynaive ; inscertificate ; insport ; insuser ; inspswd ; insconfig
