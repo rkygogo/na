@@ -47,6 +47,7 @@ elif [[ $bit = aarch64 ]]; then
 cpu=arm64
 else
 red "VPS的CPU架构为$bit 脚本不支持当前CPU架构，请使用amd64或arm64架构的CPU运行脚本" && exit
+fi
 
 vi=`systemd-detect-virt`
 rm -rf /etc/localtime
