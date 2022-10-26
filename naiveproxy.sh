@@ -432,7 +432,7 @@ wget -N --no-check-certificate https://gitlab.com/rwkgyg/cfwarp/raw/main/CFwarp.
 }
 
 bbr(){
-bash <(curl -L -s https://raw.githubusercontents.com/teddysun/across/master/bbr.sh)
+bash <(curl -L -s https://raw.githubusercontent.com/teddysun/across/master/bbr.sh)
 }
 
 naiveproxystatus(){
