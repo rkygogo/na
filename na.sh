@@ -59,18 +59,6 @@ else
 bbr="暂不支持显示"
 fi
 
-wgcfgo(){
-wgcfv6=$(curl -s6m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-wgcfv4=$(curl -s4m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-if [[ ! $wgcfv4 =~ on|plus && ! $wgcfv6 =~ on|plus ]]; then
-sureipadress
-else
-systemctl stop wg-quick@wgcf >/dev/null 2>&1
-sureipadress
-systemctl start wg-quick@wgcf >/dev/null 2>&1
-fi
-}
-
 start(){
 if [[ $vi = openvz ]]; then
 TUN=$(cat /dev/net/tun 2>&1)
@@ -158,9 +146,6 @@ mkdir /etc/caddy
 }
 
 inscaddynaive(){
-if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
-green "已安装naiveproxy，重装请先执行卸载功能" && exit
-fi
 green "请选项安装naiveproxy方式:"
 readp "1. 直接使用已编译好的caddy2-naiveproxy版本（回车默认）\n2. 自动编译最新caddy2-naiveproxy版本\n请选择：" chcaddynaive
 if [ -z "$chcaddynaive" ] || [ $chcaddynaive == "1" ]; then
@@ -519,6 +504,8 @@ echo
 insuser
 sed -i "13s/$oldusers/${user}/g" /etc/caddy/caddy_server.json
 sed -i "8s/$olduserc/${user}/g" /etc/caddy/Caddyfile
+sed -i "s/$oldusers/${user}/g" /root/naive/URL.txt
+sed -i "s/$oldusers/${user}/g" /root/naive/v2rayn.json
 sussnaiveproxy
 }
 
@@ -531,6 +518,8 @@ echo
 inspswd
 sed -i "14s/$oldpswds/${pswd}/g" /etc/caddy/caddy_server.json
 sed -i "8s/$oldpswdc/${pswd}/g" /etc/caddy/Caddyfile
+sed -i "s/$$oldpswds/${pswd}/g" /root/naive/URL.txt
+sed -i "s/$$oldpswds/${pswd}/g" /root/naive/v2rayn.json
 sussnaiveproxy
 }
 
@@ -543,6 +532,7 @@ echo
 insport
 sed -i "2s/$oldport1/$port/g" /etc/caddy/Caddyfile
 sed -i "4s/$oldport2/$port/g" /etc/caddy/Caddyfile
+sed -i "s/$oldport1/$port/g" /root/naive/URL.txt
 sussnaiveproxy
 }
 
@@ -559,6 +549,9 @@ qrencode -o - -t ANSIUTF8 "$(cat /root/naive/URL.txt)"
 }
 
 insna(){
+if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
+green "已安装naiveproxy，重装请先执行卸载功能" && exit
+fi
 start ; inscaddynaive ; inscertificate ; insport ; insuser ; inspswd ; insconfig
 insservice && naiveproxystatus
 white "$status\n"
