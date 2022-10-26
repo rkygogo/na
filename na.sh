@@ -281,7 +281,7 @@ cat << EOF >/etc/caddy/caddy_server.json
      "servers": {
        "srv0": {
          "listen": [
-           ":8964"   
+           ":58964"   
          ],
          "routes": [
            {
