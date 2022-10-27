@@ -178,7 +178,7 @@ readp "1. acme一键申请证书脚本（支持常规80端口模式与dns api模
 if [ -z "${certificate}" ] || [ $certificate == "1" ]; then
 if [[ -f /root/ygkkkca/cert.crt && -f /root/ygkkkca/private.key ]] && [[ -s /root/ygkkkca/cert.crt && -s /root/ygkkkca/private.key ]] && [[ -f /root/ygkkkca/ca.log ]]; then
 blue "经检测，之前已使用此acme脚本申请过证书"
-readp "1. 直接使用原来的证书，（回车默认）\n2. 删除原来的证书，重新申请证书\n请选择：" certacme
+readp "1. 直接使用原来的证书（回车默认）\n2. 删除原来的证书，重新申请证书\n请选择：" certacme
 if [ -z "${certacme}" ] || [ $certacme == "1" ]; then
 ym=$(cat /root/ygkkkca/ca.log)
 blue "检测到的域名：$ym ，已直接引用\n"
@@ -191,7 +191,10 @@ red "证书申请失败，脚本退出" && exit
 fi
 fi
 else
-red "输入错误，请重新选择" && inscertificate
+wget -N https://gitlab.com/rwkgyg/acme-script/raw/main/acme.sh && bash acme.sh
+ym=$(cat /root/ygkkkca/ca.log)
+if [[ ! -f /root/ygkkkca/cert.crt && ! -f /root/ygkkkca/private.key ]] && [[ ! -s /root/ygkkkca/cert.crt && ! -s /root/ygkkkca/private.key ]]; then
+red "证书申请失败，脚本退出" && exit
 fi
 fi
 certificatec='/root/ygkkkca/cert.crt'
