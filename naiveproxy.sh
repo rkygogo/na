@@ -554,6 +554,10 @@ fi
 inscaddynaive ; inscertificate ; insport ; insuser ; inspswd ; insconfig ; insservice
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
 green "naiveproxy服务启动成功"
+if [[ ! $vi =~ lxc|openvz ]]; then
+sysctl -w net.core.rmem_max=8000000
+sysctl -p
+fi
 else
 red "naiveproxy服务启动失败，请运行systemctl status caddy查看服务状态并反馈，脚本退出" && exit
 fi
