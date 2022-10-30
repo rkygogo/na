@@ -281,7 +281,7 @@ cat << EOF >/etc/caddy/caddy_server.json
      "servers": {
        "srv0": {
          "listen": [
-           ":58964"   
+           ":$port"   
          ],
          "routes": [
            {
@@ -381,8 +381,8 @@ Requires=network-online.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/bin/caddy run --environ --config /etc/caddy/Caddyfile
-ExecReload=/usr/bin/caddy reload --config /etc/caddy/Caddyfile
+ExecStart=/usr/bin/caddy run --environ --config /etc/caddy/caddy_server.json
+ExecReload=/usr/bin/caddy reload --config /etc/caddy/caddy_server.json
 TimeoutStopSec=5s
 PrivateTmp=true
 ProtectSystem=full
