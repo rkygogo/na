@@ -200,23 +200,25 @@ fi
 certificatec='/root/ygkkkca/cert.crt'
 certificatep='/root/ygkkkca/private.key'
 elif [ $certificate == "2" ]; then
-oldcer=`cat /etc/caddy/caddy_server.json 2>/dev/null | grep -w certificate | awk '{print $2}' | awk -F '"' '{ print $2}'| awk -F ',' '{ print $NF}'`
-oldkey=`cat /etc/caddy/caddy_server.json 2>/dev/null | grep -w key | awk '{print $2}' | awk -F '"' '{ print $2}'| awk -F ',' '{ print $NF}'`
-sed -i "s/$oldcer/${certificatec}/g" /etc/caddy/caddy_server.json
-sed -i "s/$oldkey/${certificatep}/g" /etc/caddy/caddy_server.json
-readp "请输入已解析好的域名:" ym
-blue "已解析好的域名：$ym "
+if [[ -f '/etc/caddy/Caddyfile' ]]; then
+green "原证书路径已重置"
+oldcer=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $2}'`
+oldkey=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $3}'`
+sed -i "2s/$oldcer/${certificatec}/g" /etc/caddy/Caddyfile
+sed -i "2s/$oldkey/${certificatep}/g" /etc/caddy/Caddyfile
+fi
 readp "请输入已放置好的公钥文件crt的路径（/a/b/……/cert.crt）：" cerroad
 blue "公钥文件crt的路径：$cerroad "
 readp "请输入已放置好的密钥文件key的路径（/a/b/……/private.key）：" keyroad
 blue "密钥文件key的路径：$keyroad "
 certificatec=$cerroad
 certificatep=$keyroad
+readp "请输入已解析好的域名:" ym
+blue "已解析好的域名：$ym "
 else 
 red "输入错误，请重新选择" && inscertificate
 fi
 }
-
 
 insport(){
 readp "\n设置naiveproxy端口[1-65535]（回车跳过为2000-65535之间的随机端口）：" port
@@ -395,42 +397,37 @@ fi
 }
 
 changeuser(){
-oldusers=`cat /etc/caddy/caddy_server.json 2>/dev/null | grep -w auth_user_deprecated | awk '{print $2}' | awk -F '"' '{ print $2}'| awk -F ',' '{ print $NF}'`
-olduserc=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 8p | awk '{print $2}'`
+olduserc=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 5p | awk '{print $2}'`
 echo
-blue "当前正在使用的用户名：$oldusers"
+blue "当前正在使用的用户名：$olduserc"
 echo
 insuser
-sed -i "13s/$oldusers/${user}/g" /etc/caddy/caddy_server.json
 sed -i "8s/$olduserc/${user}/g" /etc/caddy/Caddyfile
-sed -i "s/$oldusers/${user}/g" /root/naive/URL.txt
-sed -i "s/$oldusers/${user}/g" /root/naive/v2rayn.json
+sed -i "s/$olduserc/${user}/g" /root/naive/URL.txt
+sed -i "s/$olduserc/${user}/g" /root/naive/v2rayn.json
 sussnaiveproxy
 }
 
 changepswd(){
-oldpswds=`cat /etc/caddy/caddy_server.json 2>/dev/null | grep -w auth_pass_deprecated | awk '{print $2}' | awk -F '"' '{ print $2}'| awk -F ',' '{ print $NF}'`
-oldpswdc=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 8p | awk '{print $3}'`
+oldpswdc=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 5p | awk '{print $3}'`
 echo
-blue "当前正在使用的密码：$oldpswds"
+blue "当前正在使用的密码：$oldpswdc"
 echo
 inspswd
-sed -i "14s/$oldpswds/${pswd}/g" /etc/caddy/caddy_server.json
 sed -i "8s/$oldpswdc/${pswd}/g" /etc/caddy/Caddyfile
-sed -i "s/$$oldpswds/${pswd}/g" /root/naive/URL.txt
-sed -i "s/$$oldpswds/${pswd}/g" /root/naive/v2rayn.json
+sed -i "s/$oldpswdc/${pswd}/g" /root/naive/URL.txt
+sed -i "s/$oldpswdc/${pswd}/g" /root/naive/v2rayn.json
 sussnaiveproxy
 }
 
 changeport(){
-oldport1=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $2}'` 
-oldport2=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 4p | awk '{print $1}' | tr -d ',:'`
+oldport1=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 1p | awk '{print $1}'| tr -d ',:'`
+oldport2=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 1p | awk '{print $2}'| awk -F":" '{print $2}'`
 echo
 blue "当前正在使用的端口：$oldport1"
 echo
 insport
-sed -i "2s/$oldport1/$port/g" /etc/caddy/Caddyfile
-sed -i "4s/$oldport2/$port/g" /etc/caddy/Caddyfile
+sed -i "1s/$oldport1/$port/g" /etc/caddy/Caddyfile
 sed -i "s/$oldport1/$port/g" /root/naive/URL.txt
 sussnaiveproxy
 }
