@@ -255,11 +255,8 @@ insconfig(){
 green "设置naiveproxy配置文件……"
 mkdir -p /root/naive
 cat << EOF >/etc/caddy/Caddyfile
-{
-https_port $port
-}
-:$port, $ym
-tls admin@seewo.com
+:$port, $ym:$port
+tls ${certificatec} ${certificatep} 
 route {
  forward_proxy {
    basic_auth ${user} ${pswd}
@@ -274,98 +271,10 @@ route {
 }
 EOF
 
-cat << EOF >/etc/caddy/caddy_server.json
-{
- "apps": {
-   "http": {
-     "servers": {
-       "srv0": {
-         "listen": [
-           ":$port"   
-         ],
-         "routes": [
-           {
-             "handle": [
-               {
-                 "auth_user_deprecated": "${user}",   
-                 "auth_pass_deprecated": "${pswd}", 
-                 "handler": "forward_proxy",
-                 "hide_ip": true,
-                 "hide_via": true,
-                 "probe_resistance": {}
-               }
-             ]
-           },
-           {
-             "handle": [
-               {
-                 "handler": "reverse_proxy",
-                 "headers": {
-                   "request": {
-                     "set": {
-                       "Host": [
-                         "{http.reverse_proxy.upstream.hostport}"
-                       ],
-                       "X-Forwarded-Host": [
-                         "{http.request.host}"
-                       ]
-                     }
-                   }
-                 },
-                 "transport": {
-                   "protocol": "http",
-                   "tls": {}
-                 },
-                 "upstreams": [
-                   {
-                     "dial": "ygkkk.blogspot.com" 
-                   }
-                 ]
-               }
-             ]
-           }
-         ],
-         "tls_connection_policies": [
-           {
-             "match": {
-               "sni": [
-                 "$ym"  
-               ]
-             },
-             "certificate_selection": {
-               "any_tag": [
-                 "cert0"
-               ]
-             }
-           }
-         ],
-         "automatic_https": {
-           "disable": true
-         }
-       }
-     }
-   },
-   "tls": {
-     "certificates": {
-       "load_files": [
-         {
-           "certificate": "${certificatec}", 
-           "key": "${certificatep}",  
-           "tags": [
-             "cert0"
-           ]
-         }
-       ]
-     }
-   }
- }
-}
-EOF
-
 cat <<EOF > /root/naive/v2rayn.json
 {
   "listen": "socks://127.0.0.1:1080",
-  "proxy": "https://${user}:${pswd}@${ym}"
+  "proxy": "https://${user}:${pswd}@${ym}:$port"
 }
 EOF
 }
