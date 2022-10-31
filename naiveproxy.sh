@@ -425,7 +425,6 @@ sussnaiveproxy
 
 changeport(){
 oldport1=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 1p | awk '{print $1}'| tr -d ',:'`
-oldport2=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 1p | awk '{print $2}'| awk -F":" '{print $2}'`
 echo
 blue "当前正在使用的端口：$oldport1"
 echo
