@@ -364,39 +364,40 @@ if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/ca
 red "未正常安装naiveproxy" && exit
 fi
 green "naiveproxy配置变更选择如下:"
-readp "1. 变更证书\n2. 变更用户名\n3. 变更密码\n4. 变更端口\n5. 返回上层\n请选择：" choose
+readp "1. 添加多端口共用(每执行一次添加一个端口)\n2. 变更证书\n3. 变更用户名\n4. 变更密码\n5. 变更端口\n6. 返回上层\n请选择：" choose
 if [ $choose == "1" ];then
+duoport
+elif [ $choose == "2" ];then
 inscertificate
-green "原证书路径已重置"
 oldcer=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $2}'`
 oldkey=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $3}'`
 sed -i "s#$oldcer#${certificatec}#g" /etc/caddy/Caddyfile
 sed -i "s#$oldkey#${certificatep}#g" /etc/caddy/Caddyfile
+sed -i "s#$oldcer#${certificatec}#g" /etc/caddy/reCaddyfile
+sed -i "s#$oldkey#${certificatep}#g" /etc/caddy/reCaddyfile
 oldym=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 1p | awk '{print $2}'| awk -F":" '{print $1}'`
-sed -i "s/$oldym/${ym}/g" /etc/caddy/Caddyfile
-sed -i "s/$oldym/${ym}/g" /root/naive/URL.txt
-sed -i "s/$oldym/${ym}/g" /root/naive/v2rayn.json
+sed -i "s/$oldym/${ym}/g" /etc/caddy/Caddyfile /etc/caddy/reCaddyfile /root/naive/URL.txt /root/naive/v2rayn.json
 sussnaiveproxy
-elif [ $choose == "2" ];then
-changeuser
 elif [ $choose == "3" ];then
-changepswd
+changeuser
 elif [ $choose == "4" ];then
-changeport
+changepswd
 elif [ $choose == "5" ];then
+changeport
+elif [ $choose == "6" ];then
 na
 else 
 red "请重新选择" && changeserv
 fi
 }
 
-sussnaiveproxy(){
-systemctl restart caddy
-if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
-green "naiveproxy服务启动成功" && naiveproxyshare
-else
-red "naiveproxy服务启动失败，请运行systemctl status caddy查看服务状态并反馈，脚本退出" && exit
-fi
+duoport(){
+
+oldport1=`cat /etc/caddy/reCaddyfile 2>/dev/null | sed -n 1p | awk '{print $1}'| tr -d ',:'`
+insport
+sed -i "s/$oldport1/$port/g" /etc/caddy/reCaddyfile
+cat /etc/caddy/reCaddyfile >> /etc/caddy/Caddyfile
+sussnaiveproxy
 }
 
 changeuser(){
@@ -405,9 +406,7 @@ echo
 blue "当前正在使用的用户名：$olduserc"
 echo
 insuser
-sed -i "s/$olduserc/${user}/g" /etc/caddy/Caddyfile
-sed -i "s/$olduserc/${user}/g" /root/naive/URL.txt
-sed -i "s/$olduserc/${user}/g" /root/naive/v2rayn.json
+sed -i "s/$olduserc/${user}/g" /etc/caddy/Caddyfile /etc/caddy/reCaddyfile /root/naive/URL.txt /root/naive/v2rayn.json
 sussnaiveproxy
 }
 
@@ -417,9 +416,7 @@ echo
 blue "当前正在使用的密码：$oldpswdc"
 echo
 inspswd
-sed -i "s/$oldpswdc/${pswd}/g" /etc/caddy/Caddyfile
-sed -i "s/$oldpswdc/${pswd}/g" /root/naive/URL.txt
-sed -i "s/$oldpswdc/${pswd}/g" /root/naive/v2rayn.json
+sed -i "s/$oldpswdc/${pswd}/g" /etc/caddy/Caddyfile /etc/caddy/reCaddyfile /root/naive/URL.txt /root/naive/v2rayn.json
 sussnaiveproxy
 }
 
@@ -429,10 +426,17 @@ echo
 blue "当前正在使用的端口：$oldport1"
 echo
 insport
-sed -i "s/$oldport1/$port/g" /etc/caddy/Caddyfile
-sed -i "s/$oldport1/$port/g" /root/naive/URL.txt
-sed -i "s/$oldport1/$port/g" /root/naive/v2rayn.json
+sed -i "s/$oldport1/$port/g" /etc/caddy/Caddyfile /root/naive/v2rayn.json /root/naive/URL.txt
 sussnaiveproxy
+}
+
+sussnaiveproxy(){
+systemctl restart caddy
+if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
+green "naiveproxy服务启动成功" && naiveproxyshare
+else
+red "naiveproxy服务启动失败，请运行systemctl status caddy查看服务状态并反馈，脚本退出" && exit
+fi
 }
 
 naiveproxyshare(){
@@ -454,6 +458,7 @@ fi
 inscaddynaive ; inscertificate ; insport ; insuser ; inspswd ; insconfig ; insservice
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
 green "naiveproxy服务启动成功"
+cp -f /etc/caddy/Caddyfile /etc/caddy/reCaddyfile >/dev/null 2>&1
 if [[ ! $vi =~ lxc|openvz ]]; then
 sysctl -w net.core.rmem_max=8000000
 sysctl -p
