@@ -393,7 +393,7 @@ fi
 
 duoport(){
 naiveports=`cat /etc/caddy/Caddyfile 2>/dev/null | awk '{print $1}' | grep : | tr -d ',:'`
-green "\n当前naiveproxy代理正在使用的端口(请不要重复选择)："
+green "\n当前naiveproxy代理正在使用的端口(请不要重复增加)："
 blue "$naiveports"
 oldport1=`cat /etc/caddy/reCaddyfile 2>/dev/null | sed -n 1p | awk '{print $1}'| tr -d ',:'`
 insport
