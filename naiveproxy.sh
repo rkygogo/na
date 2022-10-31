@@ -290,8 +290,8 @@ Requires=network-online.target
 [Service]
 User=root
 Group=root
-ExecStart=/usr/bin/caddy run --environ --config /etc/caddy/caddy_server.json
-ExecReload=/usr/bin/caddy reload --config /etc/caddy/caddy_server.json
+ExecStart=/usr/bin/caddy run --environ --config /etc/caddy/Caddyfile
+ExecReload=/usr/bin/caddy reload --config /etc/caddy/Caddyfile
 TimeoutStopSec=5s
 PrivateTmp=true
 ProtectSystem=full
@@ -302,7 +302,6 @@ systemctl daemon-reload
 systemctl enable caddy
 systemctl start caddy
 }
-
 
 stclre(){
 if [[ ! -f '/etc/caddy/Caddyfile' ]]; then
