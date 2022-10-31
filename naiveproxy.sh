@@ -250,7 +250,7 @@ insconfig(){
 green "设置naiveproxy的配置文件、服务进程……\n"
 mkdir -p /root/naive
 cat << EOF >/etc/caddy/Caddyfile
-:$port, $ym:$port
+:$port, $ym:$port {
 tls ${certificatec} ${certificatep} 
 route {
  forward_proxy {
@@ -263,6 +263,7 @@ route {
    header_up  Host  {upstream_hostport}
    header_up  X-Forwarded-Host  {host}
   }
+}
 }
 EOF
 
@@ -404,7 +405,7 @@ echo
 blue "当前正在使用的用户名：$olduserc"
 echo
 insuser
-sed -i "8s/$olduserc/${user}/g" /etc/caddy/Caddyfile
+sed -i "s/$olduserc/${user}/g" /etc/caddy/Caddyfile
 sed -i "s/$olduserc/${user}/g" /root/naive/URL.txt
 sed -i "s/$olduserc/${user}/g" /root/naive/v2rayn.json
 sussnaiveproxy
@@ -416,7 +417,7 @@ echo
 blue "当前正在使用的密码：$oldpswdc"
 echo
 inspswd
-sed -i "8s/$oldpswdc/${pswd}/g" /etc/caddy/Caddyfile
+sed -i "s/$oldpswdc/${pswd}/g" /etc/caddy/Caddyfile
 sed -i "s/$oldpswdc/${pswd}/g" /root/naive/URL.txt
 sed -i "s/$oldpswdc/${pswd}/g" /root/naive/v2rayn.json
 sussnaiveproxy
