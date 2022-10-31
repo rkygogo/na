@@ -219,9 +219,9 @@ fi
 
 
 insport(){
-readp "naiveproxy端口设置[1-65535]（回车跳过为443端口）：" port
+readp "\n设置naiveproxy端口[1-65535]（回车跳过为2000-65535之间的随机端口）：" port
 if [[ -z $port ]]; then
-port=443
+port=$(shuf -i 2000-65535 -n 1)
 until [[ -z $(ss -ntlp | awk '{print $4}' | grep -w "$port") ]]
 do
 [[ -n $(ss -ntlp | awk '{print $4}' | grep -w "$port") ]] && yellow "\n端口被占用，请重新输入端口" && readp "自定义naiveproxy端口:" port
@@ -252,7 +252,7 @@ blue "已确认密码：${pswd}\n"
 }
 
 insconfig(){
-green "设置naiveproxy配置文件……"
+green "设置naiveproxy的配置文件、服务进程……\n"
 mkdir -p /root/naive
 cat << EOF >/etc/caddy/Caddyfile
 :$port, $ym:$port
@@ -277,10 +277,7 @@ cat <<EOF > /root/naive/v2rayn.json
   "proxy": "https://${user}:${pswd}@${ym}:$port"
 }
 EOF
-}
 
-insservice(){
-green "设置naiveproxy服务进程……"  
 cat << EOF >/etc/systemd/system/caddy.service
 [Unit]
 Description=Caddy
@@ -311,21 +308,15 @@ green "naiveproxy服务执行以下操作"
 readp "1. 重启\n2. 关闭\n3. 启动\n请选择：" action
 if [[ $action == "1" ]]; then
 systemctl restart caddy
-green "naiveproxy服务重启"
-naiveproxystatus
-white "$status\n"
+green "naiveproxy服务重启\n"
 elif [[ $action == "2" ]]; then
 systemctl stop caddy
 systemctl disable caddy
-green "naiveproxy服务关闭"
-naiveproxystatus
-white "$status\n"
+green "naiveproxy服务关闭\n"
 elif [[ $action == "3" ]]; then
 systemctl enable caddy
 systemctl start caddy
-green "naiveproxy服务开启"
-naiveproxystatus
-white "$status\n"
+green "naiveproxy服务开启\n"
 else
 red "输入错误,请重新选择" && stclre
 fi
@@ -367,6 +358,7 @@ green "naiveproxy-yg安装脚本升级成功"
 unins(){
 systemctl stop caddy >/dev/null 2>&1
 systemctl disable caddy >/dev/null 2>&1
+rm -f /etc/systemd/system/caddy.service
 rm -rf /usr/bin/caddy /etc/caddy /root/naive /root/naiveproxy.sh /usr/bin/na
 green "naiveproxy卸载完成！"
 }
@@ -471,8 +463,8 @@ red "naiveproxy服务启动失败，请运行systemctl status caddy查看服务�
 fi
 url="naive+https://${user}:${pswd}@${ym}:$port?padding=true#Naive-ygkkk"
 echo ${url} > /root/naive/URL.txt
-green "naiveproxy代理服务安装完成，生成脚本的快捷方式为 na"
-blue "v2rayn客户端配置文件v2rayn.json保存到 /root/naive/v2rayn.json\n"
+green "\nnaiveproxy代理服务安装完成，生成脚本的快捷方式为 na"
+blue "\nv2rayn客户端配置文件v2rayn.json保存到 /root/naive/v2rayn.json\n"
 yellow "$(cat /root/naive/v2rayn.json)\n"
 blue "分享链接保存到 /root/naive/URL.txt"
 yellow "${url}\n"
