@@ -405,6 +405,9 @@ sussnaiveproxy
 elif [ $choose == "2" ];then
 sed -i '16,$d' /etc/caddy/Caddyfile 2>/dev/null
 sussnaiveproxy
+else 
+red "请重新选择" && duoport
+fi
 }
 
 changeuser(){
