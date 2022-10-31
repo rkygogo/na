@@ -429,8 +429,9 @@ echo
 blue "当前正在使用的端口：$oldport1"
 echo
 insport
-sed -i "1s/$oldport1/$port/g" /etc/caddy/Caddyfile
+sed -i "s/$oldport1/$port/g" /etc/caddy/Caddyfile
 sed -i "s/$oldport1/$port/g" /root/naive/URL.txt
+sed -i "s/$oldport1/$port/g" /root/naive/v2rayn.json
 sussnaiveproxy
 }
 
