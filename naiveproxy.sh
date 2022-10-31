@@ -364,7 +364,7 @@ if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/ca
 red "未正常安装naiveproxy" && exit
 fi
 green "naiveproxy配置变更选择如下:"
-readp "1. 添加多端口共用(每执行一次添加一个端口)\n2. 变更证书\n3. 变更用户名\n4. 变更密码\n5. 变更端口\n6. 返回上层\n请选择：" choose
+readp "1. 添加多端口共用(每执行一次添加一个端口)\n2. 变更证书\n3. 变更用户名\n4. 变更密码\n5. 变更主端口\n6. 返回上层\n请选择：" choose
 if [ $choose == "1" ];then
 duoport
 elif [ $choose == "2" ];then
@@ -425,7 +425,7 @@ sussnaiveproxy
 changeport(){
 oldport1=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 1p | awk '{print $1}'| tr -d ',:'`
 echo
-blue "当前正在使用的端口：$oldport1"
+blue "当前正在使用的主端口：$oldport1"
 echo
 insport
 sed -i "s/$oldport1/$port/g" /etc/caddy/Caddyfile /root/naive/v2rayn.json /root/naive/URL.txt
