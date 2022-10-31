@@ -372,7 +372,6 @@ oldkey=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $3}'`
 sed -i "s/$oldcer/${certificatec}/g" /etc/caddy/Caddyfile
 sed -i "s/$oldkey/${certificatep}/g" /etc/caddy/Caddyfile
 oldym=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 1p | awk '{print $2}'| awk -F":" '{print $1}'`
-blue "正在使用的解析域名：$oldym 替换为 $ym"
 sed -i "s/$oldym/${ym}/g" /etc/caddy/Caddyfile
 sed -i "s/$oldym/${ym}/g" /root/naive/URL.txt
 sed -i "s/$oldym/${ym}/g" /root/naive/v2rayn.json
