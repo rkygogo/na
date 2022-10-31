@@ -200,21 +200,28 @@ fi
 certificatec='/root/ygkkkca/cert.crt'
 certificatep='/root/ygkkkca/private.key'
 elif [ $certificate == "2" ]; then
-if [[ -f '/etc/caddy/Caddyfile' ]]; then
-green "原证书路径已重置"
-oldcer=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $2}'`
-oldkey=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $3}'`
-sed -i "2s/$oldcer/${certificatec}/g" /etc/caddy/Caddyfile
-sed -i "2s/$oldkey/${certificatep}/g" /etc/caddy/Caddyfile
-fi
 readp "请输入已放置好的公钥文件crt的路径（/a/b/……/cert.crt）：" cerroad
 blue "公钥文件crt的路径：$cerroad "
 readp "请输入已放置好的密钥文件key的路径（/a/b/……/private.key）：" keyroad
 blue "密钥文件key的路径：$keyroad "
 certificatec=$cerroad
 certificatep=$keyroad
+if [[ -f '/etc/caddy/Caddyfile' ]]; then
+green "原证书路径已重置"
+oldcer=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $2}'`
+oldkey=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $3}'`
+sed -i "s/$oldcer/${certificatec}/g" /etc/caddy/Caddyfile
+sed -i "s/$oldkey/${certificatep}/g" /etc/caddy/Caddyfile
+fi
 readp "请输入已解析好的域名:" ym
 blue "已解析好的域名：$ym "
+if [[ -f '/etc/caddy/Caddyfile' ]]; then
+oldym=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 1p | awk '{print $2}'| awk -F":" '{print $1}'`
+echo
+blue "当前正在使用的解析域名：$oldym"
+echo
+sed -i "s/$oldym/${ym}/g" /etc/caddy/Caddyfile
+fi
 else 
 red "输入错误，请重新选择" && inscertificate
 fi
