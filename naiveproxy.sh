@@ -206,22 +206,8 @@ readp "请输入已放置好的密钥文件key的路径（/a/b/……/private.ke
 blue "密钥文件key的路径：$keyroad "
 certificatec=$cerroad
 certificatep=$keyroad
-if [[ -f '/etc/caddy/Caddyfile' ]]; then
-green "原证书路径已重置"
-oldcer=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $2}'`
-oldkey=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $3}'`
-sed -i "s/$oldcer/${certificatec}/g" /etc/caddy/Caddyfile
-sed -i "s/$oldkey/${certificatep}/g" /etc/caddy/Caddyfile
-fi
 readp "请输入已解析好的域名:" ym
 blue "已解析好的域名：$ym "
-if [[ -f '/etc/caddy/Caddyfile' ]]; then
-oldym=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 1p | awk '{print $2}'| awk -F":" '{print $1}'`
-echo
-blue "当前正在使用的解析域名：$oldym"
-echo
-sed -i "s/$oldym/${ym}/g" /etc/caddy/Caddyfile
-fi
 else 
 red "输入错误，请重新选择" && inscertificate
 fi
@@ -380,6 +366,16 @@ green "naiveproxy配置变更选择如下:"
 readp "1. 变更证书\n2. 变更用户名\n3. 变更密码\n4. 变更端口\n5. 返回上层\n请选择：" choose
 if [ $choose == "1" ];then
 inscertificate
+green "原证书路径已重置"
+oldcer=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $2}'`
+oldkey=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $3}'`
+sed -i "s/$oldcer/${certificatec}/g" /etc/caddy/Caddyfile
+sed -i "s/$oldkey/${certificatep}/g" /etc/caddy/Caddyfile
+oldym=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 1p | awk '{print $2}'| awk -F":" '{print $1}'`
+blue "正在使用的解析域名：$oldym 替换为 $ym"
+sed -i "s/$oldym/${ym}/g" /etc/caddy/Caddyfile
+sed -i "s/$oldym/${ym}/g" /root/naive/URL.txt
+sed -i "s/$oldym/${ym}/g" /root/naive/v2rayn.json
 sussnaiveproxy
 elif [ $choose == "2" ];then
 changeuser
