@@ -394,17 +394,17 @@ naiveports=`cat /etc/caddy/Caddyfile 2>/dev/null | awk '{print $1}' | grep : | t
 green "\n当前naiveproxy代理正在使用的端口："
 blue "$naiveports"
 readp "\n1. 添加多端口复用\n2. 恢复仅一个主端口\n3. 返回上层\n请选择：" choose
-if [ $choose == "1" ];then
+if [ $choose == "1" ]; then
 oldport1=`cat /etc/caddy/reCaddyfile 2>/dev/null | sed -n 1p | awk '{print $1}'| tr -d ',:'`
 insport
 sed -i "s/$oldport1/$port/g" /etc/caddy/reCaddyfile
 cat /etc/caddy/reCaddyfile >> /etc/caddy/Caddyfile
 sussnaiveproxy
-elif [ $choose == "2" ];then
+elif [ $choose == "2" ]; then
 sed -i '16,$d' /etc/caddy/Caddyfile 2>/dev/null
 sussnaiveproxy
-elif [ $choose == "3" ];then
-duoport
+elif [ $choose == "3" ]; then
+changeserv
 else 
 red "请重新选择" && duoport
 fi
@@ -511,7 +511,7 @@ red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 green " 1. 安装naiveproxy（必选）" 
 green " 2. 卸载naiveproxy"
 white "----------------------------------------------------------------------------------"
-green " 3. 四大配置变更（证书、用户名、密码、端口）" 
+green " 3. 配置变更（多端口复用、证书、用户名、密码、主端口）" 
 green " 4. 关闭、开启、重启naiveproxy"   
 green " 5. 更新naiveproxy-yg安装脚本"  
 white "----------------------------------------------------------------------------------"
