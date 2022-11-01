@@ -362,7 +362,7 @@ if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/ca
 red "未正常安装naiveproxy" && exit
 fi
 green "naiveproxy配置变更选择如下:"
-readp "1. 添加或删除多端口共用(每执行一次添加一个端口)\n2. 变更证书\n3. 变更用户名\n4. 变更密码\n5. 变更主端口\n6. 返回上层\n请选择：" choose
+readp "1. 添加或删除多端口复用(每执行一次添加一个端口)\n2. 变更证书\n3. 变更用户名\n4. 变更密码\n5. 变更主端口\n6. 返回上层\n请选择：" choose
 if [ $choose == "1" ];then
 duoport
 elif [ $choose == "2" ];then
@@ -393,7 +393,7 @@ duoport(){
 naiveports=`cat /etc/caddy/Caddyfile 2>/dev/null | awk '{print $1}' | grep : | tr -d ',:'`
 green "\n当前naiveproxy代理正在使用的端口："
 blue "$naiveports"
-green "\n1. 添加多端口共用\n2. 恢复仅一个主端口：" choose
+green "\n1. 添加多端口复用\n2. 恢复仅一个主端口" choose
 if [ $choose == "1" ];then
 oldport1=`cat /etc/caddy/reCaddyfile 2>/dev/null | sed -n 1p | awk '{print $1}'| tr -d ',:'`
 insport
