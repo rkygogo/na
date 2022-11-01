@@ -331,8 +331,6 @@ wgcfv6=$(curl -s6m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cu
 wgcfv4=$(curl -s4m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
 [[ ! $wgcfv4 =~ on|plus && ! $wgcfv6 =~ on|plus ]] && wgcf=$(green "未启用") || wgcf=$(green "启用中")
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
-chmod +x /root/naiveproxy.sh 
-ln -sf /root/naiveproxy.sh /usr/bin/na
 status=$(white "naiveproxy状态：\c";green "运行中";white "WARP状态：    \c";eval echo \$wgcf)
 elif [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/hysteria/config.json' ]]; then
 status=$(white "naiveproxy状态：\c";yellow "未启动,可尝试选择4，开启或者重启naiveproxy";white "WARP状态：    \c";eval echo \$wgcf)
@@ -471,6 +469,8 @@ fi
 inscaddynaive ; inscertificate ; insport ; insuser ; inspswd ; insconfig
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
 green "naiveproxy服务启动成功"
+chmod +x /root/naiveproxy.sh 
+ln -sf /root/naiveproxy.sh /usr/bin/na
 cp -f /etc/caddy/Caddyfile /etc/caddy/reCaddyfile >/dev/null 2>&1
 if [[ ! $vi =~ lxc|openvz ]]; then
 sysctl -w net.core.rmem_max=8000000
