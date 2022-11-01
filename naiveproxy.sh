@@ -393,7 +393,7 @@ duoport(){
 naiveports=`cat /etc/caddy/Caddyfile 2>/dev/null | awk '{print $1}' | grep : | tr -d ',:'`
 green "\n当前naiveproxy代理正在使用的端口："
 blue "$naiveports"
-readp "\n1. 添加多端口复用\n2. 恢复仅一个主端口" choose
+readp "\n1. 添加多端口复用\n2. 恢复仅一个主端口\n3. 返回上层\n请选择：" choose
 if [ $choose == "1" ];then
 oldport1=`cat /etc/caddy/reCaddyfile 2>/dev/null | sed -n 1p | awk '{print $1}'| tr -d ',:'`
 insport
@@ -403,6 +403,8 @@ sussnaiveproxy
 elif [ $choose == "2" ];then
 sed -i '16,$d' /etc/caddy/Caddyfile 2>/dev/null
 sussnaiveproxy
+elif [ $choose == "3" ];then
+duoport
 else 
 red "请重新选择" && duoport
 fi
