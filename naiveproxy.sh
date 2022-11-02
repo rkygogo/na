@@ -318,46 +318,6 @@ red "输入错误,请重新选择" && stclre
 fi
 }
 
-cfwarp(){
-wget -N --no-check-certificate https://gitlab.com/rwkgyg/cfwarp/raw/main/CFwarp.sh && bash CFwarp.sh
-}
-
-bbr(){
-bash <(curl -L -s https://raw.githubusercontent.com/teddysun/across/master/bbr.sh)
-}
-
-naiveproxystatus(){
-wgcfv6=$(curl -s6m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2) 
-wgcfv4=$(curl -s4m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
-[[ ! $wgcfv4 =~ on|plus && ! $wgcfv6 =~ on|plus ]] && wgcf=$(green "未启用") || wgcf=$(green "启用中")
-naiveports=`cat /etc/caddy/Caddyfile 2>/dev/null | awk '{print $1}' | grep : | tr -d ',:'`
-if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
-status=$(white "naiveproxy状态：\c";green "运行中";white "naiveproxy代理端口： \c";green "$naiveports";white "WARP状态：    \c";eval echo \$wgcf)
-elif [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/hysteria/config.json' ]]; then
-status=$(white "naiveproxy状态：\c";yellow "未启动,可尝试选择4，开启或者重启naiveproxy";white "WARP状态：    \c";eval echo \$wgcf)
-else
-status=$(white "naiveproxy状态：\c";red "未安装";white "WARP状态：    \c";eval echo \$wgcf)
-fi
-}
-
-upnayg(){
-if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
-red "未正常安装naiveproxy" && exit
-fi
-wget -N https://gitlab.com/rwkgyg/naiveproxy-yg/raw/main/naiveproxy.sh
-chmod +x /root/naiveproxy.sh 
-ln -sf /root/naiveproxy.sh /usr/bin/na
-green "naiveproxy-yg安装脚本升级成功"
-}
-
-unins(){
-systemctl stop caddy >/dev/null 2>&1
-systemctl disable caddy >/dev/null 2>&1
-rm -f /etc/systemd/system/caddy.service
-rm -rf /usr/bin/caddy /etc/caddy /root/naive /root/naiveproxy.sh /usr/bin/na
-green "naiveproxy卸载完成！"
-}
-
 changeserv(){
 if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
 red "未正常安装naiveproxy" && exit
@@ -439,6 +399,46 @@ echo
 insport
 sed -i "s/$oldport1/$port/g" /etc/caddy/Caddyfile /root/naive/v2rayn.json /root/naive/URL.txt
 sussnaiveproxy
+}
+
+cfwarp(){
+wget -N --no-check-certificate https://gitlab.com/rwkgyg/cfwarp/raw/main/CFwarp.sh && bash CFwarp.sh
+}
+
+bbr(){
+bash <(curl -L -s https://raw.githubusercontent.com/teddysun/across/master/bbr.sh)
+}
+
+naiveproxystatus(){
+wgcfv6=$(curl -s6m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2) 
+wgcfv4=$(curl -s4m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+[[ ! $wgcfv4 =~ on|plus && ! $wgcfv6 =~ on|plus ]] && wgcf=$(green "未启用") || wgcf=$(green "启用中")
+naiveports=`cat /etc/caddy/Caddyfile 2>/dev/null | awk '{print $1}' | grep : | tr -d ',:'`
+if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
+status=$(white "naiveproxy状态：\c";green "运行中";white "naiveproxy代理端口： \c";green "$naiveports";white "WARP状态：    \c";eval echo \$wgcf)
+elif [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/hysteria/config.json' ]]; then
+status=$(white "naiveproxy状态：\c";yellow "未启动,可尝试选择4，开启或者重启naiveproxy";white "WARP状态：    \c";eval echo \$wgcf)
+else
+status=$(white "naiveproxy状态：\c";red "未安装";white "WARP状态：    \c";eval echo \$wgcf)
+fi
+}
+
+upnayg(){
+if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
+red "未正常安装naiveproxy" && exit
+fi
+wget -N https://gitlab.com/rwkgyg/naiveproxy-yg/raw/main/naiveproxy.sh
+chmod +x /root/naiveproxy.sh 
+ln -sf /root/naiveproxy.sh /usr/bin/na
+green "naiveproxy-yg安装脚本升级成功"
+}
+
+unins(){
+systemctl stop caddy >/dev/null 2>&1
+systemctl disable caddy >/dev/null 2>&1
+rm -f /etc/systemd/system/caddy.service
+rm -rf /usr/bin/caddy /etc/caddy /root/naive /root/naiveproxy.sh /usr/bin/na
+green "naiveproxy卸载完成！"
 }
 
 sussnaiveproxy(){
