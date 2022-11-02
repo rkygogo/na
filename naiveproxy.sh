@@ -2,6 +2,7 @@
 naygV="22.10.30 V 1.0"
 remoteV=`wget -qO- https://gitlab.com/rwkgyg/naiveproxy-yg/raw/main/naiveproxy.sh | sed  -n 2p | cut -d '"' -f 2`
 chmod +x /root/naiveproxy.sh
+vsion=`curl -s "https://api.github.com/repos/klzgrad/naiveproxy/releases/latest" | grep linux-x64 | grep browser_download_url | cut -d : -f 2,3 | tr -d \" | sed -n 1p | cut -f8 -d '/'`
 red='\033[0;31m'
 bblue='\033[0;34m'
 plain='\033[0m'
@@ -176,7 +177,7 @@ fi
 
 inscertificate(){
 green "naiveproxy协议证书申请方式选择如下:"
-readp "1. acme一键申请证书脚本（支持常规80端口模式与dns api模式），已用此脚本申请的证书则自动识别（回车默认）\n2. 自定义证书路径\n请选择：" certificate
+readp "1. acme一键申请证书脚本（支持常规80端口模式与dns api模式），已用此脚本申请的证书则自动识别（回车默认）\n2. 自定义证书路径（非/root/ygkkkca）\n请选择：" certificate
 if [ -z "${certificate}" ] || [ $certificate == "1" ]; then
 if [[ -f /root/ygkkkca/cert.crt && -f /root/ygkkkca/private.key ]] && [[ -s /root/ygkkkca/cert.crt && -s /root/ygkkkca/private.key ]] && [[ -f /root/ygkkkca/ca.log ]]; then
 blue "经检测，之前已使用此acme脚本申请过证书"
@@ -514,7 +515,7 @@ red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 green " 1. 安装naiveproxy（必选）" 
 green " 2. 卸载naiveproxy"
 white "----------------------------------------------------------------------------------"
-green " 3. 配置变更（多端口复用、主端口、用户名、密码、证书）" 
+green " 3. 配置变更（多端口复用、变更主端口、变更用户名、变更密码、变更证书路径）" 
 green " 4. 关闭、开启、重启naiveproxy"   
 green " 5. 更新naiveproxy-yg安装脚本"  
 white "----------------------------------------------------------------------------------"
