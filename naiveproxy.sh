@@ -413,13 +413,13 @@ naiveproxystatus(){
 wgcfv6=$(curl -s6m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2) 
 wgcfv4=$(curl -s4m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
 [[ ! $wgcfv4 =~ on|plus && ! $wgcfv6 =~ on|plus ]] && wgcf=$(green "未启用") || wgcf=$(green "启用中")
-naiveports=`cat /etc/caddy/Caddyfile 2>/dev/null | awk '{print $1}' | grep : | tr -d ',:'`
+naiveports=`cat /etc/caddy/Caddyfile 2>/dev/null | awk '{print $1}' | grep : | tr -d ',:' | tr '\n' ' '`
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
-status=$(white "naiveproxy状态：\c";green "运行中  代理端口：$naiveports";white "WARP状态：    \c";eval echo \$wgcf)
+status=$(white "naiveproxy状态：\c";green "运行中    \c";white "可代理端口：\c";green "$naiveports";white "WARP状态：      \c";eval echo \$wgcf)
 elif [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/hysteria/config.json' ]]; then
-status=$(white "naiveproxy状态：\c";yellow "未启动,可尝试选择4，开启或者重启naiveproxy";white "WARP状态：    \c";eval echo \$wgcf)
+status=$(white "naiveproxy状态：\c";yellow "未启动,可尝试选择4，开启或者重启naiveproxy";white "WARP状态：      \c";eval echo \$wgcf)
 else
-status=$(white "naiveproxy状态：\c";red "未安装";white "WARP状态：    \c";eval echo \$wgcf)
+status=$(white "naiveproxy状态：\c";red "未安装";white "WARP状态：      \c";eval echo \$wgcf)
 fi
 }
 
@@ -530,7 +530,7 @@ yellow "检测到最新naiveproxy-yg安装脚本版本号：${remoteV} ，可选
 fi
 fi
 white "VPS系统信息如下："
-white "操作系统:     $(blue "$op")" && white "内核版本:     $(blue "$version")" && white "CPU架构 :     $(blue "$cpu")" && white "虚拟化类型:   $(blue "$vi")" && white "TCP加速算法   : $(blue "$bbr")"
+white "操作系统：      $(blue "$op")" && white "内核版本：      $(blue "$version")" && white "CPU架构：       $(blue "$cpu")" && white "虚拟化类型：    $(blue "$vi")" && white "TCP加速算法：   $(blue "$bbr")"
 white "$status"
 echo
 readp "请输入数字:" Input
