@@ -119,7 +119,7 @@ fi
 
 insupdate(){
 rm -f /etc/systemd/system/caddy.service
-rm -rf /usr/bin/caddy /etc/caddy /root/naive /root/naiveproxy.sh /usr/bin/na
+rm -rf /usr/bin/caddy /etc/caddy /root/naive /usr/bin/na
 if [[ $release = Centos ]]; then
 if [[ ${vsid} =~ 8 ]]; then
 cd /etc/yum.repos.d/ && mkdir backup && mv *repo backup/ 
