@@ -323,10 +323,16 @@ if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/ca
 red "未正常安装naiveproxy" && exit
 fi
 green "naiveproxy配置变更选择如下:"
-readp "1. 添加或删除多端口复用(每执行一次添加一个端口)\n2. 变更证书\n3. 变更用户名\n4. 变更密码\n5. 变更主端口\n6. 返回上层\n请选择：" choose
+readp "1. 添加或删除多端口复用(每执行一次添加一个端口)\n2. 变更主端口\n3. 变更用户名\n4. 变更密码\n5. 变更证书\n6. 返回上层\n请选择：" choose
 if [ $choose == "1" ];then
 duoport
 elif [ $choose == "2" ];then
+changeport
+elif [ $choose == "3" ];then
+changeuser
+elif [ $choose == "4" ];then
+changepswd
+elif [ $choose == "5" ];then
 inscertificate
 oldcer=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $2}'`
 oldkey=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $3}'`
@@ -337,12 +343,6 @@ sed -i "s#$oldkey#${certificatep}#g" /etc/caddy/reCaddyfile
 oldym=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 1p | awk '{print $2}'| awk -F":" '{print $1}'`
 sed -i "s/$oldym/${ym}/g" /etc/caddy/Caddyfile /etc/caddy/reCaddyfile /root/naive/URL.txt /root/naive/v2rayn.json
 sussnaiveproxy
-elif [ $choose == "3" ];then
-changeuser
-elif [ $choose == "4" ];then
-changepswd
-elif [ $choose == "5" ];then
-changeport
 elif [ $choose == "6" ];then
 na
 else 
@@ -512,7 +512,7 @@ red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 green " 1. 安装naiveproxy（必选）" 
 green " 2. 卸载naiveproxy"
 white "----------------------------------------------------------------------------------"
-green " 3. 配置变更（多端口复用、证书、用户名、密码、主端口）" 
+green " 3. 配置变更（多端口复用、主端口、用户名、密码、证书）" 
 green " 4. 关闭、开启、重启naiveproxy"   
 green " 5. 更新naiveproxy-yg安装脚本"  
 white "----------------------------------------------------------------------------------"
