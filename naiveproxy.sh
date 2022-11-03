@@ -465,12 +465,12 @@ if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/ca
 red "未正常安装naiveproxy" && exit
 fi
 naiveports=`cat /etc/caddy/Caddyfile 2>/dev/null | awk '{print $1}' | grep : | tr -d ',:'`
-green "\n当前naiveproxy代理正在使用的端口："
+green "\n当前naiveproxy代理正在使用的端口：" && sleep 2
 blue "$naiveports\n"
 green "当前v2rayn客户端配置文件v2rayn.json内容如下，保存到 /root/naive/v2rayn.json\n"
-yellow "$(cat /root/naive/v2rayn.json)\n"
+yellow "$(cat /root/naive/v2rayn.json)\n" && sleep 2
 green "当前naiveproxy节点分享链接如下，保存到 /root/naive/URL.txt"
-yellow "$(cat /root/naive/URL.txt)\n"
+yellow "$(cat /root/naive/URL.txt)\n" && sleep 2
 green "当前naiveproxy节点二维码分享链接如下(SagerNet / Matsuri)"
 qrencode -o - -t ANSIUTF8 "$(cat /root/naive/URL.txt)"
 }
@@ -494,12 +494,12 @@ red "naiveproxy服务启动失败，请运行systemctl status caddy查看服务�
 fi
 url="naive+https://${user}:${pswd}@${ym}:$port?padding=true#Naive-ygkkk"
 echo ${url} > /root/naive/URL.txt
-green "\nnaiveproxy代理服务安装完成，生成脚本的快捷方式为 na"
+green "\nnaiveproxy代理服务安装完成，生成脚本的快捷方式为 na" && sleep 3
 blue "\nv2rayn客户端配置文件v2rayn.json保存到 /root/naive/v2rayn.json\n"
 yellow "$(cat /root/naive/v2rayn.json)\n"
-blue "分享链接保存到 /root/naive/URL.txt"
+blue "分享链接保存到 /root/naive/URL.txt" && sleep 3
 yellow "${url}\n"
-green "二维码分享链接如下(SagerNet / Matsuri)"
+green "二维码分享链接如下(SagerNet / Matsuri)" && sleep 2
 qrencode -o - -t ANSIUTF8 "$(cat /root/naive/URL.txt)"
 }
 
