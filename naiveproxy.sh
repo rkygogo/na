@@ -145,7 +145,6 @@ red "caddy2-naiveproxy构建失败，脚本退出" && exit
 fi
 chmod +x caddy
 mv caddy /usr/bin/
-mkdir /etc/caddy
 }
 
 inscaddynaive(){
@@ -153,7 +152,7 @@ green "请选项安装naiveproxy方式:"
 readp "1. 直接使用已编译好的caddy2-naiveproxy版本（回车默认）\n2. 自动编译最新caddy2-naiveproxy版本(存在编译失败可能)\n请选择：" chcaddynaive
 if [ -z "$chcaddynaive" ] || [ $chcaddynaive == "1" ]; then
 insupdate
-wget -N https://github.com/rkygogo/na/raw/main/caddy2-naive-linux-${cpu}.tar.gz
+wget -N --no-check-certificate https://github.com/rkygogo/na/raw/main/caddy2-naive-linux-${cpu}.tar.gz
 tar zxvf caddy2-naive-linux-${cpu}.tar.gz
 rm caddy2-naive-linux-${cpu}.tar.gz -f
 rest
@@ -252,6 +251,7 @@ blue "已确认密码：${pswd}\n"
 insconfig(){
 green "设置naiveproxy的配置文件、服务进程……\n"
 mkdir -p /root/naive
+mkdir -p /etc/caddy
 cat << EOF >/etc/caddy/Caddyfile
 :$port, $ym:$port {
 tls ${certificatec} ${certificatep} 
