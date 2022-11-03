@@ -46,6 +46,8 @@ if [[ $bit = x86_64 ]]; then
 cpu=amd64
 elif [[ $bit = aarch64 ]]; then
 cpu=arm64
+elif [[ $bit = s390x ]]; then
+cpu=s390x
 else
 red "VPS的CPU架构为$bit 脚本不支持当前CPU架构，请使用amd64或arm64架构的CPU运行脚本" && exit
 fi
