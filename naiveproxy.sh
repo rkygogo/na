@@ -152,12 +152,15 @@ green "请选项安装naiveproxy方式:"
 readp "1. 直接使用已编译好的caddy2-naiveproxy版本（回车默认）\n2. 自动编译最新caddy2-naiveproxy版本(存在编译失败可能)\n请选择：" chcaddynaive
 if [ -z "$chcaddynaive" ] || [ $chcaddynaive == "1" ]; then
 insupdate
-wget -N --no-check-certificate -O /root/caddy2-naive-linux-${cpu}.tar.gz https://github.com/rkygogo/na/raw/main/caddy2-naive-linux-${cpu}.tar.gz
+cd /root
+wget -N --no-check-certificate https://github.com/rkygogo/na/raw/main/caddy2-naive-linux-${cpu}.tar.gz
 tar zxvf caddy2-naive-linux-${cpu}.tar.gz
 rm caddy2-naive-linux-${cpu}.tar.gz -f
+cd
 rest
 elif [ $chcaddynaive == "2" ]; then
 insupdate
+cd /root
 if [[ $release = Centos ]]; then 
 rpm --import https://mirror.go-repo.io/centos/RPM-GPG-KEY-GO-REPO
 curl -s https://mirror.go-repo.io/centos/go-repo.repo | tee /etc/yum.repos.d/go-repo.repo
@@ -168,6 +171,7 @@ add-apt-repository ppa:longsleep/golang-backports
 apt update 
 apt install golang-go && forwardproxy
 fi
+cd
 rest
 else 
 red "输入错误，请重新选择" && inscaddynaive
@@ -176,7 +180,7 @@ fi
 
 inscertificate(){
 green "naiveproxy协议证书申请方式选择如下:"
-readp "1. acme一键申请证书脚本（支持常规80端口模式与dns api模式），已用此脚本申请的证书则自动识别（回车默认）\n2. 自定义证书路径（非/root/ygkkkca）\n请选择：" certificate
+readp "1. acme一键申请证书脚本（支持常规80端口模式与dns api模式），已用此脚本申请的证书则自动识别（回车默认）\n2. 自定义证书路径（非/root/ygkkkca路径）\n请选择：" certificate
 if [ -z "${certificate}" ] || [ $certificate == "1" ]; then
 if [[ -f /root/ygkkkca/cert.crt && -f /root/ygkkkca/private.key ]] && [[ -s /root/ygkkkca/cert.crt && -s /root/ygkkkca/private.key ]] && [[ -f /root/ygkkkca/ca.log ]]; then
 blue "经检测，之前已使用此acme脚本申请过证书"
