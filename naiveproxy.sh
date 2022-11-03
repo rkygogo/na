@@ -152,7 +152,7 @@ mv caddy /usr/bin/
 
 inscaddynaive(){
 green "请选项安装naiveproxy方式:"
-readp "1. 直接使用已编译好的caddy2-naiveproxy版本（小白通道，无脑快速，回车默认）\n2. 自动编译最新caddy2-naiveproxy版本(存在编译失败可能)\n请选择：" chcaddynaive
+readp "1. 直接使用已编译好的caddy2-naiveproxy版本（小白通道，无脑快速，回车默认）\n2. 自动编译最新caddy2-naiveproxy版本（存在编译失败可能）\n请选择：" chcaddynaive
 if [ -z "$chcaddynaive" ] || [ $chcaddynaive == "1" ]; then
 insupdate
 cd /root
@@ -169,7 +169,7 @@ rpm --import https://mirror.go-repo.io/centos/RPM-GPG-KEY-GO-REPO
 curl -s https://mirror.go-repo.io/centos/go-repo.repo | tee /etc/yum.repos.d/go-repo.repo
 yum install golang && forwardproxy
 else
-apt install software-properties-common
+apt install software-properties-common -y
 add-apt-repository ppa:longsleep/golang-backports 
 apt update 
 apt install golang-go && forwardproxy
