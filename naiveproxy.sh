@@ -152,7 +152,7 @@ mv caddy /usr/bin/
 
 inscaddynaive(){
 green "请选项安装naiveproxy方式:"
-readp "1. 直接使用已编译好的caddy2-naiveproxy版本（回车默认）\n2. 自动编译最新caddy2-naiveproxy版本(存在编译失败可能)\n请选择：" chcaddynaive
+readp "1. 直接使用已编译好的caddy2-naiveproxy版本（小白通道，无脑快速，回车默认）\n2. 自动编译最新caddy2-naiveproxy版本(存在编译失败可能)\n请选择：" chcaddynaive
 if [ -z "$chcaddynaive" ] || [ $chcaddynaive == "1" ]; then
 insupdate
 cd /root
@@ -522,7 +522,7 @@ red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 green " 1. 安装naiveproxy（必选）" 
 green " 2. 卸载naiveproxy"
 white "----------------------------------------------------------------------------------"
-green " 3. 配置变更（多端口复用、变更主端口、变更用户名、变更密码、重申证书或变更路径）" 
+green " 3. 配置变更（多端口复用、主端口变更、用户名变更、密码变更、证书变更）" 
 green " 4. 关闭、开启、重启naiveproxy"   
 green " 5. 更新naiveproxy-yg安装脚本"  
 white "----------------------------------------------------------------------------------"
