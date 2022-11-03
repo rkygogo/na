@@ -152,7 +152,7 @@ green "请选项安装naiveproxy方式:"
 readp "1. 直接使用已编译好的caddy2-naiveproxy版本（回车默认）\n2. 自动编译最新caddy2-naiveproxy版本(存在编译失败可能)\n请选择：" chcaddynaive
 if [ -z "$chcaddynaive" ] || [ $chcaddynaive == "1" ]; then
 insupdate
-wget -N --no-check-certificate https://github.com/rkygogo/na/raw/main/caddy2-naive-linux-${cpu}.tar.gz
+wget -N --no-check-certificate -O /root/caddy2-naive-linux-${cpu}.tar.gz https://github.com/rkygogo/na/raw/main/caddy2-naive-linux-${cpu}.tar.gz
 tar zxvf caddy2-naive-linux-${cpu}.tar.gz
 rm caddy2-naive-linux-${cpu}.tar.gz -f
 rest
