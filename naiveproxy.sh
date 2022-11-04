@@ -387,7 +387,7 @@ if [ $choose == "1" ]; then
 oldport1=`cat /etc/caddy/reCaddyfile 2>/dev/null | sed -n 4p | awk '{print $1}'| tr -d ',:'`
 insport
 sed -i "s/$oldport1/$port/g" /etc/caddy/reCaddyfile
-cat /etc/caddy/reCaddyfile 2>/dev/null | tail -16 >> /etc/caddy/Caddyfile
+cat /etc/caddy/reCaddyfile 2>/dev/null | tail -15 >> /etc/caddy/Caddyfile
 sussnaiveproxy
 elif [ $choose == "2" ]; then
 sed -i '19,$d' /etc/caddy/Caddyfile 2>/dev/null
