@@ -256,7 +256,7 @@ blue "已确认密码：${pswd}\n"
 }
 
 insconfig(){
-readp "\n设置caddy2-naiveproxy监听端口[1-65535]（回车跳过为2000-65535之间的随机端口）：" caddyport
+readp "设置caddy2-naiveproxy监听端口[1-65535]（回车跳过为2000-65535之间的随机端口）：" caddyport
 if [[ -z $caddyport ]]; then
 caddyport=$(shuf -i 2000-65535 -n 1)
 until [[ -z $(ss -ntlp | awk '{print $4}' | grep -w "$caddyport") ]]
