@@ -192,7 +192,14 @@ if [ -z "${certacme}" ] || [ $certacme == "1" ]; then
 ym=$(cat /root/ygkkkca/ca.log)
 blue "检测到的域名：$ym ，已直接引用\n"
 elif [ $certacme == "2" ]; then
+[[ -z $(/root/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh证书申请，无法执行" && exit 
+curl https://get.acme.sh | sh
+bash /root/.acme.sh/acme.sh --uninstall
 rm -rf /root/ygkkkca
+rm -rf ~/.acme.sh acme.sh
+sed -i '/--cron/d' /etc/crontab
+[[ -z $(/root/.acme.sh/acme.sh -v 2>/dev/null) ]] && green "acme.sh卸载完毕" || red "acme.sh卸载失败"
+sleep 2
 wget -N https://gitlab.com/rwkgyg/acme-script/raw/main/acme.sh && bash acme.sh
 ym=$(cat /root/ygkkkca/ca.log)
 if [[ ! -f /root/ygkkkca/cert.crt && ! -f /root/ygkkkca/private.key ]] && [[ ! -s /root/ygkkkca/cert.crt && ! -s /root/ygkkkca/private.key ]]; then
