@@ -482,6 +482,7 @@ naiveproxyshare(){
 if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
 red "未正常安装naiveproxy" && exit
 fi
+red "======================================================================================"
 naiveports=`cat /etc/caddy/Caddyfile 2>/dev/null | awk '{print $1}' | grep : | tr -d ',:'`
 green "\n当前naiveproxy代理正在使用的端口：" && sleep 2
 blue "$naiveports\n"
@@ -510,6 +511,7 @@ fi
 else
 red "naiveproxy服务启动失败，请运行systemctl status caddy查看服务状态并反馈，脚本退出" && exit
 fi
+red "======================================================================================"
 url="naive+https://${user}:${pswd}@${ym}:$port?padding=true#Naive-ygkkk"
 echo ${url} > /root/naive/URL.txt
 green "\nnaiveproxy代理服务安装完成，生成脚本的快捷方式为 na" && sleep 3
