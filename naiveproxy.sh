@@ -256,17 +256,17 @@ blue "已确认密码：${pswd}\n"
 }
 
 insconfig(){
-readp "\n设置caddy2-naiveproxy监听端口[1-65535]（回车跳过为2000-65535之间的随机端口）：" port
-if [[ -z $port ]]; then
-port=$(shuf -i 2000-65535 -n 1)
-until [[ -z $(ss -ntlp | awk '{print $4}' | grep -w "$port") ]]
+readp "\n设置caddy2-naiveproxy监听端口[1-65535]（回车跳过为2000-65535之间的随机端口）：" caddyport
+if [[ -z $caddyport ]]; then
+caddyport=$(shuf -i 2000-65535 -n 1)
+until [[ -z $(ss -ntlp | awk '{print $4}' | grep -w "$caddyport") ]]
 do
-[[ -n $(ss -ntlp | awk '{print $4}' | grep -w "$port") ]] && yellow "\n端口被占用，请重新输入端口" && readp "自定义caddy2-naiveproxy监听端口:" port
+[[ -n $(ss -ntlp | awk '{print $4}' | grep -w "$caddyport") ]] && yellow "\n端口被占用，请重新输入端口" && readp "自定义caddy2-naiveproxy监听端口:" caddyport
 done
 else
-until [[ -z $(ss -ntlp | awk '{print $4}' | grep -w "$port") ]]
+until [[ -z $(ss -ntlp | awk '{print $4}' | grep -w "$caddyport") ]]
 do
-[[ -n $(ss -ntlp | awk '{print $4}' | grep -w "$port") ]] && yellow "\n端口被占用，请重新输入端口" && readp "自定义caddy2-naiveproxy监听端口:" port
+[[ -n $(ss -ntlp | awk '{print $4}' | grep -w "$caddyport") ]] && yellow "\n端口被占用，请重新输入端口" && readp "自定义caddy2-naiveproxy监听端口:" caddyport
 done
 fi
 blue "已确认端口：$caddyport\n"
