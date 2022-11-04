@@ -436,6 +436,10 @@ sed -i "s/$oldport1/$port/g" /etc/caddy/Caddyfile /root/naive/v2rayn.json /root/
 sussnaiveproxy
 }
 
+acme(){
+bash <(curl -L -s https://gitlab.com/rwkgyg/acme-script/raw/main/acme.sh)
+}
+
 cfwarp(){
 wget -N --no-check-certificate https://gitlab.com/rwkgyg/cfwarp/raw/main/CFwarp.sh && bash CFwarp.sh
 }
@@ -554,8 +558,9 @@ green " 4. 关闭、开启、重启naiveproxy"
 green " 5. 更新naiveproxy-yg安装脚本"  
 white "----------------------------------------------------------------------------------"
 green " 6. 显示当前naiveproxy分享链接、V2rayN配置文件、二维码"
-green " 7. 安装warp（可选）"
-green " 8. 安装bbr加速（可选）"
+green " 7. acme证书管理菜单
+green " 8. 安装warp（可选）"
+green " 9. 安装bbr加速（可选）"
 green " 0. 退出脚本"
 red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
@@ -578,8 +583,9 @@ case "$Input" in
  4 ) stclre;;
  5 ) upnayg;; 
  6 ) naiveproxyshare;;
- 7 ) cfwarp;;
- 8 ) bbr;;
+ 7 ) acme;;
+ 8 ) cfwarp;;
+ 9 ) bbr;;
  * ) exit 
 esac
 }
