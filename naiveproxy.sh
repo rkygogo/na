@@ -362,13 +362,13 @@ elif [ $choose == "4" ];then
 changepswd
 elif [ $choose == "5" ];then
 inscertificate
-oldcer=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $2}'`
-oldkey=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 2p | awk '{print $3}'`
+oldcer=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 5p | awk '{print $2}'`
+oldkey=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 5p | awk '{print $3}'`
 sed -i "s#$oldcer#${certificatec}#g" /etc/caddy/Caddyfile
 sed -i "s#$oldkey#${certificatep}#g" /etc/caddy/Caddyfile
 sed -i "s#$oldcer#${certificatec}#g" /etc/caddy/reCaddyfile
 sed -i "s#$oldkey#${certificatep}#g" /etc/caddy/reCaddyfile
-oldym=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 1p | awk '{print $2}'| awk -F":" '{print $1}'`
+oldym=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 4p | awk '{print $2}'| awk -F":" '{print $1}'`
 sed -i "s/$oldym/${ym}/g" /etc/caddy/Caddyfile /etc/caddy/reCaddyfile /root/naive/URL.txt /root/naive/v2rayn.json
 sussnaiveproxy
 elif [ $choose == "6" ];then
@@ -384,13 +384,13 @@ green "\n当前naiveproxy代理正在使用的端口："
 blue "$naiveports"
 readp "\n1. 添加多端口复用\n2. 恢复仅一个主端口\n3. 返回上层\n请选择：" choose
 if [ $choose == "1" ]; then
-oldport1=`cat /etc/caddy/reCaddyfile 2>/dev/null | sed -n 1p | awk '{print $1}'| tr -d ',:'`
+oldport1=`cat /etc/caddy/reCaddyfile 2>/dev/null | sed -n 4p | awk '{print $1}'| tr -d ',:'`
 insport
 sed -i "s/$oldport1/$port/g" /etc/caddy/reCaddyfile
-cat /etc/caddy/reCaddyfile >> /etc/caddy/Caddyfile
+cat /etc/caddy/reCaddyfile 2>/dev/null | tail -16 >> /etc/caddy/Caddyfile
 sussnaiveproxy
 elif [ $choose == "2" ]; then
-sed -i '16,$d' /etc/caddy/Caddyfile 2>/dev/null
+sed -i '19,$d' /etc/caddy/Caddyfile 2>/dev/null
 sussnaiveproxy
 elif [ $choose == "3" ]; then
 changeserv
@@ -400,7 +400,7 @@ fi
 }
 
 changeuser(){
-olduserc=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 5p | awk '{print $2}'`
+olduserc=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 8p | awk '{print $2}'`
 echo
 blue "当前正在使用的用户名：$olduserc"
 echo
@@ -410,7 +410,7 @@ sussnaiveproxy
 }
 
 changepswd(){
-oldpswdc=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 5p | awk '{print $3}'`
+oldpswdc=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 8p | awk '{print $3}'`
 echo
 blue "当前正在使用的密码：$oldpswdc"
 echo
@@ -420,7 +420,7 @@ sussnaiveproxy
 }
 
 changeport(){
-oldport1=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 1p | awk '{print $1}'| tr -d ',:'`
+oldport1=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 4p | awk '{print $1}'| tr -d ',:'`
 echo
 blue "当前正在使用的主端口：$oldport1"
 echo
