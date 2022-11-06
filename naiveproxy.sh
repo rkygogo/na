@@ -559,7 +559,7 @@ white "-------------------------------------------------------------------------
 green " 6. 显示当前naiveproxy分享链接、V2rayN配置文件、二维码"
 green " 7. ACME证书管理菜单"
 green " 8. 安装WARP（可选）"
-green " 9. 安装BBR+加速（可选）"
+green " 9. 安装BBR+FQ加速（可选）"
 green " 0. 退出脚本"
 red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
@@ -570,10 +570,10 @@ green "当前naiveproxy-yg安装脚本版本号：${naygV}"
 yellow "检测到最新naiveproxy-yg安装脚本版本号：${remoteV} ，可选择5进行更新\n"
 fi
 if [ "$ygvsion" = "$lastvsion" ]; then
-green "当前naiveproxy版本号：$ygvsion ，已是官方最新版本\n"
+green "当前naiveproxy内核版本号：$ygvsion ，已是官方最新版本\n"
 else
-green "当前naiveproxy版本号：$ygvsion"
-yellow "检测到最新naiveproxy版本号：$lastvsion ，可选择6进行更新\n"
+green "当前naiveproxy内核版本号：$ygvsion"
+yellow "检测到最新naiveproxy内核版本号：$lastvsion ，可选择6进行更新\n"
 fi
 fi
 white "VPS系统信息如下："
