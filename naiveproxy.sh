@@ -569,11 +569,11 @@ else
 green "当前naiveproxy-yg安装脚本版本号：${naygV}"
 yellow "检测到最新naiveproxy-yg安装脚本版本号：${remoteV} ，可选择5进行更新\n"
 fi
-green "当前naiveproxy本地完成编译版本号：$ygvsion"
-green "当前naiveproxy官方发布最新版本号：$lastvsion"
 if [ "$ygvsion" = "$lastvsion" ]; then
-green ""
-
+green "当前naiveproxy版本号：$ygvsion ，已是官方最新版本\n"
+else
+green "当前naiveproxy版本号：$ygvsion"
+yellow "检测到最新naiveproxy版本号：$lastvsion ，可选择6进行更新\n"
 fi
 fi
 white "VPS系统信息如下："
@@ -597,6 +597,6 @@ esac
 if [ $# == 0 ]; then
 start
 lastvsion=`curl -s "https://api.github.com/repos/klzgrad/naiveproxy/releases/latest" | grep linux-x64 | grep browser_download_url | cut -d : -f 2,3 | tr -d \" | sed -n 1p | cut -f8 -d '/'`
-ygvsion='v107.0.5304.87-1'
+ygvsion=`curl -s "https://gitlab.com/rwkgyg/naiveproxy-yg/raw/main/version"`
 start_menu
 fi
