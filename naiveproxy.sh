@@ -151,7 +151,7 @@ mv caddy /usr/bin/
 
 inscaddynaive(){
 green "请选项安装naiveproxy方式:"
-readp "1. 使用已编译好的caddy2-naiveproxy版本，当前最新版本号：$ygvsion（快速安装，回车默认）\n2. 自动编译最新caddy2-naiveproxy版本，当前最新版本号：$lastvsion（存在编译失败可能）\n请选择：" chcaddynaive
+readp "1. 使用已编译好的caddy2-naiveproxy版本，当前本地最新版本号：$ygvsion（快速安装，回车默认）\n2. 自动编译最新caddy2-naiveproxy版本，当前官方最新版本号：$lastvsion（存在编译失败可能）\n请选择：" chcaddynaive
 if [ -z "$chcaddynaive" ] || [ $chcaddynaive == "1" ]; then
 insupdate
 cd /root
@@ -569,9 +569,12 @@ else
 green "当前naiveproxy-yg安装脚本版本号：${naygV}"
 yellow "检测到最新naiveproxy-yg安装脚本版本号：${remoteV} ，可选择5进行更新\n"
 fi
+green "当前naiveproxy本地完成编译版本号：$ygvsion"
+green "当前naiveproxy官方发布最新版本号：$lastvsion"
+if [ "$ygvsion" = "$lastvsion" ]; then
+green ""
 
-
-
+fi
 fi
 white "VPS系统信息如下："
 white "操作系统：      $(blue "$op")" && white "内核版本：      $(blue "$version")" && white "CPU架构：       $(blue "$cpu")" && white "虚拟化类型：    $(blue "$vi")" && white "TCP加速算法：   $(blue "$bbr")"
