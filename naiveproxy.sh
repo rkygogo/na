@@ -150,7 +150,7 @@ mv caddy /usr/bin/
 }
 
 inscaddynaive(){
-green "请选项安装naiveproxy方式:"
+green "请选择安装naiveproxy方式:"
 readp "1. 使用已编译好的caddy2-naiveproxy版本，当前本地最新版本号：$ygvsion（快速安装，回车默认）\n2. 自动编译最新caddy2-naiveproxy版本，当前官方最新版本号：$lastvsion（存在编译失败可能）\n请选择：" chcaddynaive
 if [ -z "$chcaddynaive" ] || [ $chcaddynaive == "1" ]; then
 insupdate
