@@ -1,8 +1,7 @@
 #!/bin/bash
-naygV="22.10.30 V 1.0"
+naygV="22.11.5 V 1.0"
 remoteV=`wget -qO- https://gitlab.com/rwkgyg/naiveproxy-yg/raw/main/naiveproxy.sh | sed  -n 2p | cut -d '"' -f 2`
 chmod +x /root/naiveproxy.sh
-vsion=`curl -s "https://api.github.com/repos/klzgrad/naiveproxy/releases/latest" | grep linux-x64 | grep browser_download_url | cut -d : -f 2,3 | tr -d \" | sed -n 1p | cut -f8 -d '/'`
 red='\033[0;31m'
 bblue='\033[0;34m'
 plain='\033[0m'
@@ -152,11 +151,11 @@ mv caddy /usr/bin/
 
 inscaddynaive(){
 green "请选项安装naiveproxy方式:"
-readp "1. 直接使用已编译好的caddy2-naiveproxy版本（小白通道，无脑快速，回车默认）\n2. 自动编译最新caddy2-naiveproxy版本（存在编译失败可能）\n请选择：" chcaddynaive
+readp "1. 使用已编译好的caddy2-naiveproxy版本，当前最新版本号：$ygvsion（快速安装，回车默认）\n2. 自动编译最新caddy2-naiveproxy版本，当前最新版本号：$lastvsion（存在编译失败可能）\n请选择：" chcaddynaive
 if [ -z "$chcaddynaive" ] || [ $chcaddynaive == "1" ]; then
 insupdate
 cd /root
-wget -N --no-check-certificate https://github.com/rkygogo/na/raw/main/caddy2-naive-linux-${cpu}.tar.gz
+wget -N --no-check-certificate https://gitlab.com/rwkgyg/naiveproxy-yg/raw/main/caddy2-naive-linux-${cpu}.tar.gz
 tar zxvf caddy2-naive-linux-${cpu}.tar.gz
 rm caddy2-naive-linux-${cpu}.tar.gz -f
 cd
@@ -570,6 +569,9 @@ else
 green "当前naiveproxy-yg安装脚本版本号：${naygV}"
 yellow "检测到最新naiveproxy-yg安装脚本版本号：${remoteV} ，可选择5进行更新\n"
 fi
+
+
+
 fi
 white "VPS系统信息如下："
 white "操作系统：      $(blue "$op")" && white "内核版本：      $(blue "$version")" && white "CPU架构：       $(blue "$cpu")" && white "虚拟化类型：    $(blue "$vi")" && white "TCP加速算法：   $(blue "$bbr")"
@@ -591,5 +593,7 @@ esac
 }
 if [ $# == 0 ]; then
 start
+lastvsion=`curl -s "https://api.github.com/repos/klzgrad/naiveproxy/releases/latest" | grep linux-x64 | grep browser_download_url | cut -d : -f 2,3 | tr -d \" | sed -n 1p | cut -f8 -d '/'`
+ygvsion='v107.0.5304.87-1'
 start_menu
 fi
