@@ -150,12 +150,14 @@ mv caddy /usr/bin/
 }
 
 inscaddynaive(){
-green "请选择安装naiveproxy方式:"
-readp "1. 使用已编译好的caddy2-naiveproxy版本，当前本地最新版本号：$ygvsion（快速安装，回车默认）\n2. 自动编译最新caddy2-naiveproxy版本，当前官方最新版本号：$lastvsion（存在编译失败可能）\n请选择：" chcaddynaive
+naygvsion=`curl -s "https://gitlab.com/rwkgyg/naiveproxy-yg/raw/main/version"`
+green "请选择安装或者更新naiveproxy内核方式:"
+readp "1. 使用已编译好的caddy2-naiveproxy版本，当前脚本已更新到最新版本号：$naygvsion（快速安装，回车默认）\n2. 自动编译最新caddy2-naiveproxy版本，当前官方最新版本号：$lastvsion（存在编译失败可能）\n请选择：" chcaddynaive
 if [ -z "$chcaddynaive" ] || [ $chcaddynaive == "1" ]; then
 insupdate
 cd /root
 wget -N --no-check-certificate https://gitlab.com/rwkgyg/naiveproxy-yg/raw/main/caddy2-naive-linux-${cpu}.tar.gz
+wget -qN --no-check-certificate https://gitlab.com/rwkgyg/naiveproxy-yg/raw/main/version
 tar zxvf caddy2-naive-linux-${cpu}.tar.gz
 rm caddy2-naive-linux-${cpu}.tar.gz -f
 cd
@@ -175,6 +177,8 @@ apt install golang-go && forwardproxy
 fi
 cd
 rest
+lastvsion=`curl -s "https://api.github.com/repos/klzgrad/naiveproxy/releases/latest" | grep linux-x64 | grep browser_download_url | cut -d : -f 2,3 | tr -d \" | sed -n 1p | cut -f8 -d '/'
+echo $lastvsion > /root/version
 else 
 red "输入错误，请重新选择" && inscaddynaive
 fi
@@ -280,6 +284,7 @@ blue "已确认端口：$caddyport\n"
 green "设置naiveproxy的配置文件、服务进程……\n"
 mkdir -p /root/naive
 mkdir -p /etc/caddy
+mv version /etc/caddy/
 cat << EOF >/etc/caddy/Caddyfile
 {
 http_port $caddyport
@@ -471,6 +476,14 @@ ln -sf /root/naiveproxy.sh /usr/bin/na
 green "naiveproxy-yg安装脚本升级成功"
 }
 
+upnaive(){
+if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
+red "未正常安装naiveproxy" && exit
+fi
+green "升级naiveproxy内核版本号，\n"
+inscaddynaive
+}
+
 unins(){
 systemctl stop caddy >/dev/null 2>&1
 systemctl disable caddy >/dev/null 2>&1
@@ -554,12 +567,13 @@ green " 2. 卸载naiveproxy"
 white "----------------------------------------------------------------------------------"
 green " 3. 变更配置（多端口复用、主端口、用户名、密码、证书）" 
 green " 4. 关闭、开启、重启naiveproxy"   
-green " 5. 更新naiveproxy-yg安装脚本"  
+green " 5. 更新naiveproxy-yg安装脚本"
+green " 6. 更新naiveproxy内核版本"
 white "----------------------------------------------------------------------------------"
-green " 6. 显示当前naiveproxy分享链接、V2rayN配置文件、二维码"
-green " 7. ACME证书管理菜单"
-green " 8. 安装WARP（可选）"
-green " 9. 安装BBR+FQ加速（可选）"
+green " 7. 显示当前naiveproxy分享链接、V2rayN配置文件、二维码"
+green " 8. ACME证书管理菜单"
+green " 9. 安装WARP（可选）"
+green " 10. 安装BBR+FQ加速（可选）"
 green " 0. 退出脚本"
 red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
@@ -570,9 +584,9 @@ green "当前naiveproxy-yg安装脚本版本号：${naygV}"
 yellow "检测到最新naiveproxy-yg安装脚本版本号：${remoteV} ，可选择5进行更新\n"
 fi
 if [ "$ygvsion" = "$lastvsion" ]; then
-green "当前naiveproxy内核版本号：$ygvsion ，已是官方最新版本\n"
+green "当前已安装naiveproxy内核版本号：$ygvsion ，已是官方最新版本\n"
 else
-green "当前naiveproxy内核版本号：$ygvsion"
+green "当前已安装naiveproxy内核版本号：$ygvsion"
 yellow "检测到最新naiveproxy内核版本号：$lastvsion ，可选择6进行更新\n"
 fi
 fi
@@ -597,6 +611,6 @@ esac
 if [ $# == 0 ]; then
 start
 lastvsion=`curl -s "https://api.github.com/repos/klzgrad/naiveproxy/releases/latest" | grep linux-x64 | grep browser_download_url | cut -d : -f 2,3 | tr -d \" | sed -n 1p | cut -f8 -d '/'`
-ygvsion=`curl -s "https://gitlab.com/rwkgyg/naiveproxy-yg/raw/main/version"`
+ygvsion=`cat /etc/caddy/version 2>/dev/null`
 start_menu
 fi
