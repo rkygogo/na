@@ -1,5 +1,5 @@
 #!/bin/bash
-naygV="22.11.5 V 1.0"
+naygV="22.11.5 V 1.5"
 remoteV=`wget -qO- https://gitlab.com/rwkgyg/naiveproxy-yg/raw/main/naiveproxy.sh | sed  -n 2p | cut -d '"' -f 2`
 chmod +x /root/naiveproxy.sh
 red='\033[0;31m'
@@ -473,15 +473,17 @@ fi
 wget -N https://gitlab.com/rwkgyg/naiveproxy-yg/raw/main/naiveproxy.sh
 chmod +x /root/naiveproxy.sh 
 ln -sf /root/naiveproxy.sh /usr/bin/na
-green "naiveproxy-yg安装脚本升级成功"
+green "naiveproxy-yg安装脚本升级成功" && na
 }
 
 upnaive(){
 if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
 red "未正常安装naiveproxy" && exit
 fi
-green "升级naiveproxy内核版本号，\n"
+yellow "升级naiveproxy内核版本\n"
 inscaddynaive
+systemctl restart caddy
+green "naiveproxy内核版本升级成功" && na
 }
 
 unins(){
