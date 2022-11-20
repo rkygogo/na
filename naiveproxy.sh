@@ -283,14 +283,14 @@ blue "已确认密码：${pswd}\n"
 }
 
 insweb(){
-readp "设置naiveproxy伪装网址，（回车跳过为甬哥博客地址 ygkkk.blogspot.com ）：" web
+readp "设置naiveproxy伪装网址，（回车跳过为 甬哥博客地址：ygkkk.blogspot.com ）：" web
 if [[ -z ${web} ]]; then
 naweb=ygkkk.blogspot.com
 else
 naweb=$web
 fi
+blue "已确认伪装网址：${naweb}\n"
 }
-
 
 insconfig(){
 readp "设置caddy2-naiveproxy监听端口[1-65535]（回车跳过为2000-65535之间的随机端口）：" caddyport
@@ -598,7 +598,7 @@ red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 green "  1. 安装naiveproxy（必选）" 
 green "  2. 卸载naiveproxy"
 white "----------------------------------------------------------------------------------"
-green "  3. 变更配置（多端口复用、主端口、用户名、密码、证书）" 
+green "  3. 变更配置（多端口复用、主端口、用户名、密码、证书、伪装网页）" 
 green "  4. 关闭、开启、重启naiveproxy"   
 green "  5. 更新naiveproxy-yg安装脚本"
 green "  6. 更新naiveproxy内核版本"
