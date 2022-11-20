@@ -281,6 +281,16 @@ fi
 fi
 blue "已确认密码：${pswd}\n"
 }
+
+insweb(){
+readp "设置naiveproxy伪装网址，（回车跳过为甬哥博客地址 ygkkk.blogspot.com ）：" web
+if [[ -z ${web} ]]; then
+naweb=ygkkk.blogspot.com
+else
+naweb=$web
+}
+
+
 insconfig(){
 readp "设置caddy2-naiveproxy监听端口[1-65535]（回车跳过为2000-65535之间的随机端口）：" caddyport
 if [[ -z $caddyport ]]; then
@@ -315,7 +325,7 @@ route {
    hide_via
    probe_resistance
   }
- reverse_proxy  https://ygkkk.blogspot.com  {
+ reverse_proxy  https://$naweb {
    header_up  Host  {upstream_hostport}
    header_up  X-Forwarded-Host  {host}
   }
@@ -451,6 +461,16 @@ sed -i "s/$oldport1/$port/g" /etc/caddy/Caddyfile /root/naive/v2rayn.json /root/
 sussnaiveproxy
 }
 
+changeweb(){
+oldweb=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 13p | awk '{print $2}' | awk -F '//' '{print $2}'`
+echo
+blue "当前正在使用的伪装网址：$oldweb"
+echo
+insweb
+sed -i "s/$oldweb/$naweb/g" /etc/caddy/Caddyfile /etc/caddy/reCaddyfile
+sussnaiveproxy
+}
+
 acme(){
 bash <(curl -L -s https://gitlab.com/rwkgyg/acme-script/raw/main/acme.sh)
 }
@@ -534,7 +554,7 @@ green "已安装naiveproxy，重装请先执行卸载功能" && exit
 fi
 rm -f /etc/systemd/system/caddy.service
 rm -rf /usr/bin/caddy /etc/caddy /root/naive /usr/bin/na
-inscaddynaive ; inscertificate ; insport ; insuser ; inspswd ; insconfig
+inscaddynaive ; inscertificate ; insport ; insuser ; inspswd ; insweb ; insconfig
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
 green "naiveproxy服务启动成功"
 chmod +x /root/naiveproxy.sh 
