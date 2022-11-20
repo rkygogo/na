@@ -288,6 +288,7 @@ if [[ -z ${web} ]]; then
 naweb=ygkkk.blogspot.com
 else
 naweb=$web
+fi
 }
 
 
