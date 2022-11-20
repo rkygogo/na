@@ -1,8 +1,9 @@
 #!/bin/bash
-naygV="22.11.5 V 1.5"
+naygV="22.11.12 V 1.8"
 remoteV=`wget -qO- https://gitlab.com/rwkgyg/naiveproxy-yg/raw/main/naiveproxy.sh | sed  -n 2p | cut -d '"' -f 2`
 chmod +x /root/naiveproxy.sh
 red='\033[0;31m'
+yellow='\033[0;33m'
 bblue='\033[0;34m'
 plain='\033[0m'
 blue(){ echo -e "\033[36m\033[01m$1\033[0m";}
@@ -91,7 +92,7 @@ fi
 fi
 [[ $(type -P yum) ]] && yumapt='yum -y' || yumapt='apt -y'
 [[ $(type -P curl) ]] || (yellow "检测到curl未安装，升级安装中" && $yumapt update;$yumapt install curl)
-[[ $(type -P lsof) ]] || (yellow "检测到lsof未安装，升级安装中" && $yumapt update;$yumapt install lsof)
+[[ ! $(type -P sysctl) ]] && ($yumapt update;$yumapt install procps)
 [[ ! $(type -P qrencode) ]] && ($yumapt update;$yumapt install qrencode)
 if [[ -z $(grep 'DiG 9' /etc/hosts) ]]; then
 v4=$(curl -s4m5 https://ip.gs -k)
@@ -106,7 +107,6 @@ ufw disable >/dev/null 2>&1
 iptables -P INPUT ACCEPT >/dev/null 2>&1
 iptables -P FORWARD ACCEPT >/dev/null 2>&1
 iptables -P OUTPUT ACCEPT >/dev/null 2>&1
-iptables -t nat -F >/dev/null 2>&1
 iptables -t mangle -F >/dev/null 2>&1
 iptables -F >/dev/null 2>&1
 iptables -X >/dev/null 2>&1
@@ -120,8 +120,6 @@ fi
 }
 
 insupdate(){
-rm -f /etc/systemd/system/caddy.service
-rm -rf /usr/bin/caddy /etc/caddy /root/naive /usr/bin/na
 if [[ $release = Centos ]]; then
 if [[ ${vsid} =~ 8 ]]; then
 cd /etc/yum.repos.d/ && mkdir backup && mv *repo backup/ 
@@ -129,7 +127,6 @@ curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-
 sed -i -e "s|mirrors.cloud.aliyuncs.com|mirrors.aliyun.com|g " /etc/yum.repos.d/CentOS-*
 sed -i -e "s|releasever|releasever-stream|g" /etc/yum.repos.d/CentOS-*
 yum clean all && yum makecache
-green "Centos 8 系统建议使用编译好的caddy2-naiveproxy版本" && inscaddynaive
 fi
 yum install epel-release -y
 else
@@ -151,8 +148,8 @@ mv caddy /usr/bin/
 
 inscaddynaive(){
 naygvsion=`curl -s "https://gitlab.com/rwkgyg/naiveproxy-yg/raw/main/version"`
-green "请选择安装或者更新naiveproxy内核方式:"
-readp "1. 使用已编译好的caddy2-naiveproxy版本，当前脚本已更新到最新版本号：$naygvsion（快速安装，回车默认）\n2. 自动编译最新caddy2-naiveproxy版本，当前官方最新版本号：$lastvsion（存在编译失败可能）\n请选择：" chcaddynaive
+green "请选择安装或者更新 naiveproxy 内核方式:"
+readp "1. 使用已编译好的 caddy2-naiveproxy 版本，当前已编译到最新版本号： $naygvsion （快速安装，回车默认）\n2. 自动编译最新 caddy2-naiveproxy 版本，当前官方最新版本号： $lastvsion （存在编译失败可能）\n请选择：" chcaddynaive
 if [ -z "$chcaddynaive" ] || [ $chcaddynaive == "1" ]; then
 insupdate
 cd /root
@@ -163,6 +160,9 @@ rm caddy2-naive-linux-${cpu}.tar.gz -f
 cd
 rest
 elif [ $chcaddynaive == "2" ]; then
+if [[ $release = Centos ]] && [[ ${vsid} =~ 8 ]]; then
+green "Centos 8 系统建议使用编译好的caddy2-naiveproxy版本" && inscaddynaive
+fi
 insupdate
 cd /root
 if [[ $release = Centos ]]; then 
@@ -177,11 +177,18 @@ apt install golang-go && forwardproxy
 fi
 cd
 rest
-lastvsion=`curl -s "https://api.github.com/repos/klzgrad/naiveproxy/releases/latest" | grep linux-x64 | grep browser_download_url | cut -d : -f 2,3 | tr -d \" | sed -n 1p | cut -f8 -d '/'
+lastvsion=v`curl -Ls https://data.jsdelivr.com/v1/package/gh/klzgrad/naiveproxy | sed -n 4p | tr -d ',"' | awk '{print $1}'`
 echo $lastvsion > /root/version
 else 
 red "输入错误，请重新选择" && inscaddynaive
 fi
+version(){
+if [[ ! -d /etc/caddy/ ]]; then
+mkdir /etc/caddy >/dev/null 2>&1
+fi
+mv version /etc/caddy/
+}
+version
 }
 
 inscertificate(){
@@ -195,7 +202,6 @@ if [ -z "${certacme}" ] || [ $certacme == "1" ]; then
 ym=$(cat /root/ygkkkca/ca.log)
 blue "检测到的域名：$ym ，已直接引用\n"
 elif [ $certacme == "2" ]; then
-[[ -z $(/root/.acme.sh/acme.sh -v 2>/dev/null) ]] && yellow "未安装acme.sh证书申请，无法执行" && exit 
 curl https://get.acme.sh | sh
 bash /root/.acme.sh/acme.sh --uninstall
 rm -rf /root/ygkkkca
@@ -231,7 +237,6 @@ else
 red "输入错误，请重新选择" && inscertificate
 fi
 }
-
 insport(){
 readp "\n设置naiveproxy端口[1-65535]（回车跳过为2000-65535之间的随机端口）：" port
 if [[ -z $port ]]; then
@@ -248,27 +253,41 @@ done
 fi
 blue "已确认端口：$port\n"
 }
-
 insuser(){
-readp "设置naiveproxy用户名（回车跳过为随机6位字符）：" user
+readp "设置naiveproxy用户名，必须为6位字符以上（回车跳过为随机6位字符）：" user
 if [[ -z ${user} ]]; then
 user=`date +%s%N |md5sum | cut -c 1-6`
+else
+if [[ 6 -ge ${#user} ]]; then
+until [[ 6 -le ${#user} ]]
+do
+[[ 6 -ge ${#user} ]] && yellow "\n用户名必须为6位字符以上！请重新输入" && readp "\n设置naiveproxy用户名：" user
+done
+fi
 fi
 blue "已确认用户名：${user}\n"
 }
-
 inspswd(){
-readp "设置naiveproxy密码（回车跳过为随机10位字符）：" pswd
+readp "设置naiveproxy密码，必须为10位字符以上（回车跳过为随机10位字符）：" pswd
 if [[ -z ${pswd} ]]; then
 pswd=`date +%s%N |md5sum | cut -c 1-10`
+else
+if [[ 10 -ge ${#pswd} ]]; then
+until [[ 10 -le ${#pswd} ]]
+do
+[[ 10 -ge ${#pswd} ]] && yellow "\n用户名必须为10位字符以上！请重新输入" && readp "\n设置naiveproxy密码：" pswd
+done
+fi
 fi
 blue "已确认密码：${pswd}\n"
 }
-
 insconfig(){
 readp "设置caddy2-naiveproxy监听端口[1-65535]（回车跳过为2000-65535之间的随机端口）：" caddyport
 if [[ -z $caddyport ]]; then
 caddyport=$(shuf -i 2000-65535 -n 1)
+if [[ $caddyport == $port ]]; then
+yellow "\n端口被占用，请重新输入端口" && readp "自定义caddy2-naiveproxy监听端口:" caddyport
+fi
 until [[ -z $(ss -ntlp | awk '{print $4}' | grep -w "$caddyport") ]]
 do
 [[ -n $(ss -ntlp | awk '{print $4}' | grep -w "$caddyport") ]] && yellow "\n端口被占用，请重新输入端口" && readp "自定义caddy2-naiveproxy监听端口:" caddyport
@@ -280,11 +299,9 @@ do
 done
 fi
 blue "已确认端口：$caddyport\n"
-
 green "设置naiveproxy的配置文件、服务进程……\n"
-mkdir -p /root/naive
-mkdir -p /etc/caddy
-mv version /etc/caddy/
+mkdir /root/naive >/dev/null 2>&1
+mkdir /etc/caddy >/dev/null 2>&1
 cat << EOF >/etc/caddy/Caddyfile
 {
 http_port $caddyport
@@ -305,14 +322,12 @@ route {
 }
 }
 EOF
-
 cat <<EOF > /root/naive/v2rayn.json
 {
   "listen": "socks://127.0.0.1:1080",
   "proxy": "https://${user}:${pswd}@${ym}:$port"
 }
 EOF
-
 cat << EOF >/etc/systemd/system/caddy.service
 [Unit]
 Description=Caddy
@@ -325,8 +340,10 @@ Group=root
 ExecStart=/usr/bin/caddy run --environ --config /etc/caddy/Caddyfile
 ExecReload=/usr/bin/caddy reload --config /etc/caddy/Caddyfile
 TimeoutStopSec=5s
-PrivateTmp=true
-ProtectSystem=full
+PrivateTmp=false
+NoNewPrivileges=yes
+ProtectHome=false
+ProtectSystem=false
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -334,7 +351,6 @@ systemctl daemon-reload
 systemctl enable caddy
 systemctl start caddy
 }
-
 stclre(){
 if [[ ! -f '/etc/caddy/Caddyfile' ]]; then
 green "未正常安装naiveproxy" && exit
@@ -356,7 +372,6 @@ else
 red "输入错误,请重新选择" && stclre
 fi
 }
-
 changeserv(){
 if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
 red "未正常安装naiveproxy" && exit
@@ -388,7 +403,6 @@ else
 red "请重新选择" && changeserv
 fi
 }
-
 duoport(){
 naiveports=`cat /etc/caddy/Caddyfile 2>/dev/null | awk '{print $1}' | grep : | tr -d ',:'`
 green "\n当前naiveproxy代理正在使用的端口："
@@ -409,7 +423,6 @@ else
 red "请重新选择" && duoport
 fi
 }
-
 changeuser(){
 olduserc=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 8p | awk '{print $2}'`
 echo
@@ -419,7 +432,6 @@ insuser
 sed -i "s/$olduserc/${user}/g" /etc/caddy/Caddyfile /etc/caddy/reCaddyfile /root/naive/URL.txt /root/naive/v2rayn.json
 sussnaiveproxy
 }
-
 changepswd(){
 oldpswdc=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 8p | awk '{print $3}'`
 echo
@@ -429,7 +441,6 @@ inspswd
 sed -i "s/$oldpswdc/${pswd}/g" /etc/caddy/Caddyfile /etc/caddy/reCaddyfile /root/naive/URL.txt /root/naive/v2rayn.json
 sussnaiveproxy
 }
-
 changeport(){
 oldport1=`cat /etc/caddy/Caddyfile 2>/dev/null | sed -n 4p | awk '{print $1}'| tr -d ',:'`
 echo
@@ -443,11 +454,9 @@ sussnaiveproxy
 acme(){
 bash <(curl -L -s https://gitlab.com/rwkgyg/acme-script/raw/main/acme.sh)
 }
-
 cfwarp(){
 wget -N --no-check-certificate https://gitlab.com/rwkgyg/cfwarp/raw/main/CFwarp.sh && bash CFwarp.sh
 }
-
 bbr(){
 bash <(curl -L -s https://raw.githubusercontent.com/teddysun/across/master/bbr.sh)
 }
@@ -459,8 +468,8 @@ wgcfv4=$(curl -s4m5 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cu
 naiveports=`cat /etc/caddy/Caddyfile 2>/dev/null | awk '{print $1}' | grep : | tr -d ',:' | tr '\n' ' '`
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
 status=$(white "naiveproxy状态：\c";green "运行中    \c";white "可代理端口：\c";green "$naiveports";white "WARP状态：      \c";eval echo \$wgcf)
-elif [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/hysteria/config.json' ]]; then
-status=$(white "naiveproxy状态：\c";yellow "未启动,可尝试选择4，开启或者重启naiveproxy";white "WARP状态：      \c";eval echo \$wgcf)
+elif [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
+status=$(white "naiveproxy状态：\c";yellow "未启动,可尝试选择4，开启或者重启，依旧如此建议卸载重装naiveproxy";white "WARP状态：      \c";eval echo \$wgcf)
 else
 status=$(white "naiveproxy状态：\c";red "未安装";white "WARP状态：      \c";eval echo \$wgcf)
 fi
@@ -480,7 +489,7 @@ upnaive(){
 if [[ -z $(systemctl status caddy 2>/dev/null | grep -w active) && ! -f '/etc/caddy/Caddyfile' ]]; then
 red "未正常安装naiveproxy" && exit
 fi
-yellow "升级naiveproxy内核版本\n"
+green "\n升级naiveproxy内核版本\n"
 inscaddynaive
 systemctl restart caddy
 green "naiveproxy内核版本升级成功" && na
@@ -523,6 +532,8 @@ insna(){
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
 green "已安装naiveproxy，重装请先执行卸载功能" && exit
 fi
+rm -f /etc/systemd/system/caddy.service
+rm -rf /usr/bin/caddy /etc/caddy /root/naive /usr/bin/na
 inscaddynaive ; inscertificate ; insport ; insuser ; inspswd ; insconfig
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
 green "naiveproxy服务启动成功"
@@ -547,7 +558,6 @@ yellow "${url}\n"
 green "二维码分享链接如下(SagerNet / Matsuri)" && sleep 2
 qrencode -o - -t ANSIUTF8 "$(cat /root/naive/URL.txt)"
 }
-
 start_menu(){
 naiveproxystatus
 clear
@@ -564,34 +574,35 @@ white "甬哥blogger博客 ：ygkkk.blogspot.com"
 white "甬哥YouTube频道 ：www.youtube.com/c/甬哥侃侃侃kkkyg"
 green "naiveproxy-yg脚本安装成功后，再次进入脚本的快捷方式为 na"
 red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-green " 1. 安装naiveproxy（必选）" 
-green " 2. 卸载naiveproxy"
+green "  1. 安装naiveproxy（必选）" 
+green "  2. 卸载naiveproxy"
 white "----------------------------------------------------------------------------------"
-green " 3. 变更配置（多端口复用、主端口、用户名、密码、证书）" 
-green " 4. 关闭、开启、重启naiveproxy"   
-green " 5. 更新naiveproxy-yg安装脚本"
-green " 6. 更新naiveproxy内核版本"
+green "  3. 变更配置（多端口复用、主端口、用户名、密码、证书）" 
+green "  4. 关闭、开启、重启naiveproxy"   
+green "  5. 更新naiveproxy-yg安装脚本"
+green "  6. 更新naiveproxy内核版本"
 white "----------------------------------------------------------------------------------"
-green " 7. 显示当前naiveproxy分享链接、V2rayN配置文件、二维码"
-green " 8. ACME证书管理菜单"
-green " 9. 安装WARP（可选）"
+green "  7. 显示当前naiveproxy分享链接、V2rayN配置文件、二维码"
+green "  8. ACME证书管理菜单"
+green "  9. 安装WARP（可选）"
 green " 10. 安装BBR+FQ加速（可选）"
-green " 0. 退出脚本"
+green "  0. 退出脚本"
 red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 if [[ -n $(systemctl status caddy 2>/dev/null | grep -w active) && -f '/etc/caddy/Caddyfile' ]]; then
 if [ "${naygV}" = "${remoteV}" ]; then
-green "当前naiveproxy-yg安装脚本版本号：${naygV} ，已是最新版本\n"
+echo -e "当前 naiveproxy-yg 安装脚本版本号：${bblue}${naygV}${plain} ，已是最新版本\n"
 else
-green "当前naiveproxy-yg安装脚本版本号：${naygV}"
-yellow "检测到最新naiveproxy-yg安装脚本版本号：${remoteV} ，可选择5进行更新\n"
+echo -e "当前 naiveproxy-yg 安装脚本版本号：${bblue}${naygV}${plain}"
+echo -e "检测到最新 naiveproxy-yg 安装脚本版本号：${yellow}${remoteV}${plain} ，可选择5进行更新\n"
 fi
 if [ "$ygvsion" = "$lastvsion" ]; then
-green "当前已安装naiveproxy内核版本号：$ygvsion ，已是官方最新版本\n"
+echo -e "当前 naiveproxy 已安装内核版本号：${bblue}${ygvsion}${plain} ，已是官方最新版本"
 else
-green "当前已安装naiveproxy内核版本号：$ygvsion"
-yellow "检测到最新naiveproxy内核版本号：$lastvsion ，可选择6进行更新\n"
+echo -e "当前 naiveproxy 已安装内核版本号：${bblue}${ygvsion}${plain}"
+echo -e "检测到最新 naiveproxy 内核版本号：${yellow}${lastvsion}${plain} ，可选择6进行更新"
 fi
 fi
+red "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 white "VPS系统信息如下："
 white "操作系统：      $(blue "$op")" && white "内核版本：      $(blue "$version")" && white "CPU架构：       $(blue "$cpu")" && white "虚拟化类型：    $(blue "$vi")" && white "TCP加速算法：   $(blue "$bbr")"
 white "$status"
@@ -603,16 +614,17 @@ case "$Input" in
  3 ) changeserv;;
  4 ) stclre;;
  5 ) upnayg;; 
- 6 ) naiveproxyshare;;
- 7 ) acme;;
- 8 ) cfwarp;;
- 9 ) bbr;;
+ 6 ) upnaive;;
+ 7 ) naiveproxyshare;;
+ 8 ) acme;;
+ 9 ) cfwarp;;
+ 10 ) bbr;;
  * ) exit 
 esac
 }
 if [ $# == 0 ]; then
 start
-lastvsion=`curl -s "https://api.github.com/repos/klzgrad/naiveproxy/releases/latest" | grep linux-x64 | grep browser_download_url | cut -d : -f 2,3 | tr -d \" | sed -n 1p | cut -f8 -d '/'`
+lastvsion=v`curl -Ls https://data.jsdelivr.com/v1/package/gh/klzgrad/naiveproxy | sed -n 4p | tr -d ',"' | awk '{print $1}'`
 ygvsion=`cat /etc/caddy/version 2>/dev/null`
 start_menu
 fi
